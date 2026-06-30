@@ -30,7 +30,7 @@
 
 <script>
 
-  // 🗺️ Leaflet Map (WICHTIG: CRS.Simple für Bilder)
+  // 🗺️ MAP INIT
   var map = L.map('map', {
     crs: L.CRS.Simple,
     minZoom: -2,
@@ -41,21 +41,37 @@
   // 🖼️ DEIN BILD
   var imageUrl = "https://dertiffy.github.io/svm_worldmap/kumu_Mittelerde_small2.jpg";
 
-  // 📏 DEINE BILDGRÖSSE (7000 x 6000)
+  // 📏 BILDGRÖSSE
   var w = 7000;
   var h = 6000;
 
-  // 🧭 Bounds korrekt setzen (Leaflet Format!)
+  // 🧭 BOUNDS
   var bounds = [[0, 0], [h, w]];
 
-  // 🖼️ Bild als Overlay
-  var overlay = L.imageOverlay(imageUrl, bounds).addTo(map);
+  // 🖼️ OVERLAY
+  L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  // 🔍 Ansicht auf Bild setzen
+  // 🔍 VIEW FIT
   map.fitBounds(bounds);
 
-  // 🧱 verhindert „wegscrollen“
+  // 🧱 LIMITS
   map.setMaxBounds(bounds);
+
+  // =========================
+  // 📍 PINS / ORTE
+  // =========================
+
+  // 🟢 Einfacher Pin
+  L.marker([1200, 1500]).addTo(map)
+    .bindPopup("<b>Bree</b><br>Handelsstadt am alten Weg.");
+
+  // 🟢 Pin 2
+  L.marker([2500, 4000]).addTo(map)
+    .bindPopup("<b>Düsterwald</b><br>Gefährlicher Wald voller Geheimnisse.");
+
+  // 🟢 Pin 3
+  L.marker([4500, 3000]).addTo(map)
+    .bindPopup("<b>Minas Tirith</b><br>Weiße Stadt Gondors.");
 
 </script>
 
