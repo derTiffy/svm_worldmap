@@ -30,7 +30,7 @@
 
 <script>
 
-  // 🗺️ Leaflet Map Setup
+  // 🗺️ Leaflet Map (WICHTIG: CRS.Simple für Bilder)
   var map = L.map('map', {
     crs: L.CRS.Simple,
     minZoom: -2,
@@ -38,22 +38,23 @@
     zoomSnap: 0.25
   });
 
-  // 🖼️ DEIN BILD AUS GITHUB
-  var imageUrl = "https://dertiffy.github.io/svm_worldmap/kumu_Mittelerde_small2.png";
+  // 🖼️ DEIN BILD
+  var imageUrl = "https://dertiffy.github.io/svm_worldmap/kumu_Mittelerde_small2.jpg";
 
-  // ⚠️ WICHTIG: Größe deiner Map (bitte ggf. anpassen!)
-  var w = 11212;
-  var h = 9716;
+  // 📏 DEINE BILDGRÖSSE (7000 x 6000)
+  var w = 7000;
+  var h = 6000;
 
+  // 🧭 Bounds korrekt setzen (Leaflet Format!)
   var bounds = [[0, 0], [h, w]];
 
   // 🖼️ Bild als Overlay
-  L.imageOverlay(imageUrl, bounds).addTo(map);
+  var overlay = L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  // 🔍 Startansicht
+  // 🔍 Ansicht auf Bild setzen
   map.fitBounds(bounds);
 
-  // 🧱 Begrenzen, damit man nicht “verliert”
+  // 🧱 verhindert „wegscrollen“
   map.setMaxBounds(bounds);
 
 </script>
