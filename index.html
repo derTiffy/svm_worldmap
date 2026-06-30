@@ -30,41 +30,31 @@
 
 <script>
 
-  // 🗺️ Map Setup (wichtig: CRS.Simple für Bilder)
+  // 🗺️ Leaflet Map Setup
   var map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: -3,
+    minZoom: -2,
     maxZoom: 2,
-    zoomSnap: 0.25,
-    zoomControl: true
+    zoomSnap: 0.25
   });
 
-  // 📏 Bildgröße (deine Originalkarte)
+  // 🖼️ DEIN BILD AUS GITHUB
+  var imageUrl = "https://dertiffy.github.io/svm_worldmap/kumu_Mittelerde_small2.png";
+
+  // ⚠️ WICHTIG: Größe deiner Map (bitte ggf. anpassen!)
   var w = 11212;
   var h = 9716;
 
-  // 📦 Bounds korrekt setzen
-  var southWest = map.unproject([0, h], map.getMaxZoom());
-  var northEast = map.unproject([w, 0], map.getMaxZoom());
-  var bounds = new L.LatLngBounds(southWest, northEast);
+  var bounds = [[0, 0], [h, w]];
 
-  // 🖼️ Bild (MapTiler oder lokales Bild möglich)
-  var imageUrl = "https://drive.usercontent.google.com/download?id=1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK";
+  // 🖼️ Bild als Overlay
+  L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  var overlay = L.imageOverlay(imageUrl, bounds).addTo(map);
-
-  // 🔍 WICHTIG: Startansicht korrekt setzen
+  // 🔍 Startansicht
   map.fitBounds(bounds);
 
-  // 🧱 verhindert „leere Welt außerhalb der Karte“
+  // 🧱 Begrenzen, damit man nicht “verliert”
   map.setMaxBounds(bounds);
-
-  // 🚫 verhindert extremes rauszoomen (Fix für dein Problem)
-  map.options.minZoom = -2;
-
-  // 📍 Testmarker
-  L.marker([0, 0]).addTo(map)
-    .bindPopup("Startpunkt");
 
 </script>
 
