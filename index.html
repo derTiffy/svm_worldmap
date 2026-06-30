@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>SVM Worldmap</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+  <style>
+    #map {
+      height: 100vh;
+      width: 100%;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+  // Karte erstellen
+  var map = L.map('map', {
+    crs: L.CRS.Simple,
+    minZoom: -2
+  });
+
+  // Fake-Kartengröße (Test)
+  var bounds = [[0,0], [1000,1000]];
+
+  // Testbild (nur zum prüfen ob alles funktioniert)
+  L.imageOverlay(
+    'https://upload.wikimedia.org/wikipedia/commons/8/80/World_map_-_low_resolution.svg',
+    bounds
+  ).addTo(map);
+
+  map.fitBounds(bounds);
+
+  // Test-Pin
+  L.marker([500, 500]).addTo(map)
+    .bindPopup("Test-Ort: Zentrum der Welt")
+    .openPopup();
+</script>
+
+</body>
+</html>
