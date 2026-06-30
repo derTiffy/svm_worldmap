@@ -12,6 +12,7 @@
       padding: 0;
       height: 100%;
       width: 100%;
+      background: #000;
     }
 
     #map {
@@ -29,45 +30,41 @@
 
 <script>
 
-  // 🧠 1. Map initialisieren (Pixel-Koordinaten-System)
+  // 🗺️ Map Setup (wichtig: CRS.Simple für Bilder)
   var map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: 0,
-    maxZoom: 6,
+    minZoom: -3,
+    maxZoom: 2,
     zoomSnap: 0.25,
     zoomControl: true
   });
 
-  // 🗺️ 2. Originalbildgröße (wichtig für Bounds!)
-  var imageWidth = 11212;
-  var imageHeight = 9716;
+  // 📏 Bildgröße (deine Originalkarte)
+  var w = 11212;
+  var h = 9716;
 
-  // 📦 3. Bounds (Leaflet nutzt [y, x]!)
-  var southWest = map.unproject([0, imageHeight], map.getMaxZoom());
-  var northEast = map.unproject([imageWidth, 0], map.getMaxZoom());
+  // 📦 Bounds korrekt setzen
+  var southWest = map.unproject([0, h], map.getMaxZoom());
+  var northEast = map.unproject([w, 0], map.getMaxZoom());
   var bounds = new L.LatLngBounds(southWest, northEast);
 
-  // 🧩 4. Tile Layer (MapTiler XYZ)
-  var tileUrl = "https://api.maptiler.com/images/019f1836-d777-75f0-8d8e-9f18ceb0e263/{z}/{x}/{y}?key=iat7fGL5ew2cepuCfp3Z";
+  // 🖼️ Bild (MapTiler oder lokales Bild möglich)
+  var imageUrl = "https://drive.usercontent.google.com/download?id=1olUSXjN4ZmOIXfAERP6iiNm62fT392G-";
 
-  L.tileLayer(tileUrl, {
-    tileSize: 256,
-    minZoom: 0,
-    maxZoom: 6,
-    noWrap: true,
-    bounds: bounds,
-    attribution: "Fantasy Map"
-  }).addTo(map);
+  var overlay = L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  // 🔍 5. Auto-Zoom auf ganze Karte
+  // 🔍 WICHTIG: Startansicht korrekt setzen
   map.fitBounds(bounds);
 
-  // 🧱 6. Begrenzen (kein raus-scrollen)
+  // 🧱 verhindert „leere Welt außerhalb der Karte“
   map.setMaxBounds(bounds);
 
-  // 📍 7. Testmarker (optional)
+  // 🚫 verhindert extremes rauszoomen (Fix für dein Problem)
+  map.options.minZoom = -2;
+
+  // 📍 Testmarker
   L.marker([0, 0]).addTo(map)
-    .bindPopup("Origin");
+    .bindPopup("Startpunkt");
 
 </script>
 
