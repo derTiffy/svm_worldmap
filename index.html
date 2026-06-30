@@ -1,77 +1,110 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Mittelerde Karte</title>
   <meta charset="utf-8" />
-  <title>SVM Worldmap</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-      background: #000;
-    }
-
     #map {
       height: 100vh;
-      width: 100%;
+      background: #111;
     }
   </style>
 </head>
-
 <body>
 
 <div id="map"></div>
 
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
 
-  // 🗺️ MAP INIT
-  var map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -2,
-    maxZoom: 2,
-    zoomSnap: 0.25
+// ------------------------
+// KARTE
+// ------------------------
+
+var map = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -2,
+  maxZoom: 2
+});
+
+var bounds = [[0,0], [6000,7000]];
+
+L.imageOverlay('svm_worldmap/kumu_Mittelerde_small2.jpg', bounds).addTo(map);
+map.fitBounds(bounds);
+
+
+// ------------------------
+// ICONS
+// ------------------------
+
+function createIcon(type, zoom) {
+  let size = 20 + (zoom * 8); // wächst beim Zoomen
+
+  let iconHtml = "";
+
+  if (type === "city") {
+    iconHtml = "🏠";
+  } else if (type === "settlement") {
+    iconHtml = "🔥";
+  } else {
+    iconHtml = "📍";
+  }
+
+  return L.divIcon({
+    html: `<div style="font-size:${size}px;">${iconHtml}</div>`,
+    className: ''
   });
+}
 
-  // 🖼️ DEIN BILD
-  var imageUrl = "https://dertiffy.github.io/svm_worldmap/kumu_Mittelerde_small2.jpg";
 
-  // 📏 BILDGRÖSSE
-  var w = 7000;
-  var h = 6000;
+// ------------------------
+// PIN DATEN (HIER BEARBEITEN)
+// ------------------------
 
-  // 🧭 BOUNDS
-  var bounds = [[0, 0], [h, w]];
+var locations = [
+  { name: "Minas Tirith", coords: [3200, 2500], type: "city" },
+  { name: "Helms Klamm", coords: [2800, 1800], type: "settlement" },
+  { name: "Schicksalsberg", coords: [4000, 3000], type: "poi" }
+];
 
-  // 🖼️ OVERLAY
-  L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  // 🔍 VIEW FIT
-  map.fitBounds(bounds);
+// ------------------------
+// MARKER ERSTELLEN
+// ------------------------
 
-  // 🧱 LIMITS
-  map.setMaxBounds(bounds);
+var markers = [];
 
-  // =========================
-  // 📍 PINS / ORTE
-  // =========================
+function drawMarkers() {
+  let zoom = map.getZoom();
 
-  // 🟢 Einfacher Pin
-  L.marker([1200, 1500]).addTo(map)
-    .bindPopup("<b>Bree</b><br>Handelsstadt am alten Weg.");
+  markers.forEach(m => map.removeLayer(m));
+  markers = [];
 
-  // 🟢 Pin 2
-  L.marker([2500, 4000]).addTo(map)
-    .bindPopup("<b>Düsterwald</b><br>Gefährlicher Wald voller Geheimnisse.");
+  locations.forEach(loc => {
+    let marker = L.marker(loc.coords, {
+      icon: createIcon(loc.type, zoom)
+    }).addTo(map);
 
-  // 🟢 Pin 3
-  L.marker([4500, 3000]).addTo(map)
-    .bindPopup("<b>Minas Tirith</b><br>Weiße Stadt Gondors.");
+    marker.bindPopup("<b>" + loc.name + "</b>");
+
+    markers.push(marker);
+  });
+}
+
+drawMarkers();
+
+
+// ------------------------
+// DYNAMISCHES ZOOM
+// ------------------------
+
+map.on('zoomend', function() {
+  drawMarkers();
+});
 
 </script>
 
