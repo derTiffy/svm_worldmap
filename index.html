@@ -22,7 +22,7 @@
 <script>
 
 // ------------------------
-// KARTE
+// MAP
 // ------------------------
 
 var map = L.map('map', {
@@ -31,80 +31,12 @@ var map = L.map('map', {
   maxZoom: 2
 });
 
+// WICHTIG: Höhe, Breite!
 var bounds = [[0,0], [6000,7000]];
 
-L.imageOverlay('svm_worldmap/kumu_Mittelerde_small2.jpg', bounds).addTo(map);
+var image = L.imageOverlay('svm_worldmap/kumu_Mittelerde_small2.jpg', bounds).addTo(map);
+
 map.fitBounds(bounds);
-
-
-// ------------------------
-// ICONS
-// ------------------------
-
-function createIcon(type, zoom) {
-  let size = 20 + (zoom * 8); // wächst beim Zoomen
-
-  let iconHtml = "";
-
-  if (type === "city") {
-    iconHtml = "🏠";
-  } else if (type === "settlement") {
-    iconHtml = "🔥";
-  } else {
-    iconHtml = "📍";
-  }
-
-  return L.divIcon({
-    html: `<div style="font-size:${size}px;">${iconHtml}</div>`,
-    className: ''
-  });
-}
-
-
-// ------------------------
-// PIN DATEN (HIER BEARBEITEN)
-// ------------------------
-
-var locations = [
-  { name: "Minas Tirith", coords: [3200, 2500], type: "city" },
-  { name: "Helms Klamm", coords: [2800, 1800], type: "settlement" },
-  { name: "Schicksalsberg", coords: [4000, 3000], type: "poi" }
-];
-
-
-// ------------------------
-// MARKER ERSTELLEN
-// ------------------------
-
-var markers = [];
-
-function drawMarkers() {
-  let zoom = map.getZoom();
-
-  markers.forEach(m => map.removeLayer(m));
-  markers = [];
-
-  locations.forEach(loc => {
-    let marker = L.marker(loc.coords, {
-      icon: createIcon(loc.type, zoom)
-    }).addTo(map);
-
-    marker.bindPopup("<b>" + loc.name + "</b>");
-
-    markers.push(marker);
-  });
-}
-
-drawMarkers();
-
-
-// ------------------------
-// DYNAMISCHES ZOOM
-// ------------------------
-
-map.on('zoomend', function() {
-  drawMarkers();
-});
 
 </script>
 
