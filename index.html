@@ -29,36 +29,45 @@
 
 <script>
 
-  // 🗺️ Karte initialisieren
+  // 🧠 1. Map initialisieren (Pixel-Koordinaten-System)
   var map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: -5,
-    maxZoom: 2,
-    zoomSnap: 0.25
+    minZoom: 0,
+    maxZoom: 6,
+    zoomSnap: 0.25,
+    zoomControl: true
   });
 
-  // 📏 Deine echte Bildgröße
+  // 🗺️ 2. Originalbildgröße (wichtig für Bounds!)
   var imageWidth = 11212;
   var imageHeight = 9716;
 
-  // 📦 Bounds korrekt setzen (Leaflet nutzt [y, x])
-  var bounds = [[0, 0], [imageHeight, imageWidth]];
+  // 📦 3. Bounds (Leaflet nutzt [y, x]!)
+  var southWest = map.unproject([0, imageHeight], map.getMaxZoom());
+  var northEast = map.unproject([imageWidth, 0], map.getMaxZoom());
+  var bounds = new L.LatLngBounds(southWest, northEast);
 
-  // 🖼️ Dein Google Drive DIRECT LINK
-  var imageUrl = "https://api.maptiler.com/images/019f1836-d777-75f0-8d8e-9f18ceb0e263/image.json?key=iat7fGL5ew2cepuCfp3Z";
+  // 🧩 4. Tile Layer (MapTiler XYZ)
+  var tileUrl = "https://api.maptiler.com/images/019f1836-d777-75f0-8d8e-9f18ceb0e263/{z}/{x}/{y}?key=iat7fGL5ew2cepuCfp3Z";
 
-  // 🖼️ Bild laden
-  var image = L.imageOverlay(imageUrl, bounds).addTo(map);
+  L.tileLayer(tileUrl, {
+    tileSize: 256,
+    minZoom: 0,
+    maxZoom: 6,
+    noWrap: true,
+    bounds: bounds,
+    attribution: "Fantasy Map"
+  }).addTo(map);
 
-  // 🔍 Automatisch auf Karte zoomen (wichtig für kleine Screens)
+  // 🔍 5. Auto-Zoom auf ganze Karte
   map.fitBounds(bounds);
 
-  // 🧱 verhindert "wegscrollen" aus der Karte
+  // 🧱 6. Begrenzen (kein raus-scrollen)
   map.setMaxBounds(bounds);
 
-  // 📍 Testmarker (optional)
-  L.marker([5000, 5000]).addTo(map)
-    .bindPopup("Test: Zentrum der Karte");
+  // 📍 7. Testmarker (optional)
+  L.marker([0, 0]).addTo(map)
+    .bindPopup("Origin");
 
 </script>
 
