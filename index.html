@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
   <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+
     #map {
       height: 100vh;
       width: 100%;
@@ -21,29 +28,38 @@
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script>
-  // Karte erstellen
+
+  // 🗺️ Karte initialisieren
   var map = L.map('map', {
     crs: L.CRS.Simple,
-    minZoom: -2
+    minZoom: -5,
+    maxZoom: 2,
+    zoomSnap: 0.25
   });
 
-  // Kartenrahmen (Maße)
-  var bounds = [[0,0], [9716,11212]];
+  // 📏 Deine echte Bildgröße
+  var imageWidth = 11212;
+  var imageHeight = 9716;
 
+  // 📦 Bounds korrekt setzen (Leaflet nutzt [y, x])
+  var bounds = [[0, 0], [imageHeight, imageWidth]];
 
+  // 🖼️ Dein Google Drive DIRECT LINK
+  var imageUrl = "https://drive.google.com/uc?export=view&id=1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK";
 
-  // Kartenbild
-  L.imageOverlay(
-  "https://drive.google.com/uc?export=view&id=1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK",
-  bounds
-  ).addTo(map);
+  // 🖼️ Bild laden
+  var image = L.imageOverlay(imageUrl, bounds).addTo(map);
 
+  // 🔍 Automatisch auf Karte zoomen (wichtig für kleine Screens)
   map.fitBounds(bounds);
 
-  // Test-Pin
-  L.marker([500, 500]).addTo(map)
-    .bindPopup("Test-Ort: Zentrum der Welt")
-    .openPopup();
+  // 🧱 verhindert "wegscrollen" aus der Karte
+  map.setMaxBounds(bounds);
+
+  // 📍 Testmarker (optional)
+  L.marker([5000, 5000]).addTo(map)
+    .bindPopup("Test: Zentrum der Karte");
+
 </script>
 
 </body>
