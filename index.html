@@ -38,70 +38,83 @@
     zoomSnap: 0.25
   });
 
-  // 🖼️ DEIN BILD
+  // 🖼️ KARTE
   var imageUrl = "https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
 
-  // 📏 BILDGRÖSSE
   var w = 11212;
   var h = 9716;
 
-  // 🧭 BOUNDS
   var bounds = [[0, 0], [h, w]];
 
-  // 🖼️ OVERLAY
   L.imageOverlay(imageUrl, bounds).addTo(map);
 
-  // 🔍 VIEW FIT
   map.fitBounds(bounds);
-
-  // 🧱 LIMITS
   map.setMaxBounds(bounds);
 
   // =========================
-// 🧭 KOORDINATEN ANZEIGEN
-// =========================
-
-var coordBox = L.control({position: 'bottomleft'});
-
-coordBox.onAdd = function () {
-  this._div = L.DomUtil.create('div', 'coordBox');
-  this._div.style.background = "rgba(0,0,0,0.7)";
-  this._div.style.color = "white";
-  this._div.style.padding = "6px 10px";
-  this._div.style.fontSize = "14px";
-  this._div.innerHTML = "Klick auf die Karte";
-  return this._div;
-};
-
-coordBox.addTo(map);
-
-// Beim Klick Koordinaten anzeigen
-map.on('click', function(e) {
-
-  var x = Math.round(e.latlng.lng);
-  var y = Math.round(e.latlng.lat);
-
-  coordBox._div.innerHTML =
-    "X: " + x + " | Y: " + y;
-
-});
-
-
-  // =========================
-  // 📍 PINS / ORTE
+  // 🧭 KOORDINATEN ANZEIGEN
   // =========================
 
-  // 🟢 Einfacher Pin
-  L.marker([1200, 1500]).addTo(map)
-    .bindPopup("<b>Bree</b><br>Handelsstadt am alten Weg.");
+  var coordBox = L.control({position: 'bottomleft'});
 
-  // 🟢 Pin 2
-  L.marker([2500, 4000]).addTo(map)
-    .bindPopup("<b>Düsterwald</b><br>Gefährlicher Wald voller Geheimnisse.");
+  coordBox.onAdd = function () {
+    this._div = L.DomUtil.create('div', 'coordBox');
+    this._div.style.background = "rgba(0,0,0,0.7)";
+    this._div.style.color = "white";
+    this._div.style.padding = "6px 10px";
+    this._div.style.fontSize = "14px";
+    this._div.innerHTML = "Klick auf die Karte";
+    return this._div;
+  };
 
-  // 🟢 Pin 3
-  L.marker([4500, 3000]).addTo(map)
-    .bindPopup("<b>Minas Tirith</b><br>Weiße Stadt Gondors.");
+  coordBox.addTo(map);
+
+  map.on('click', function(e) {
+    var x = Math.round(e.latlng.lng);
+    var y = Math.round(e.latlng.lat);
+
+    coordBox._div.innerHTML =
+      "X: " + x + " | Y: " + y;
+  });
+
+  // =========================
+  // 📡 DATEN AUS GOOGLE SHEET (JSON)
+  // =========================
+
+  const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
+
+  fetch(sheetURL)
+    .then(res => res.json())
+    .then(data => {
+
+      data.forEach(row => {
+
+        // 🔒 Nur freigegebene
+        if (row.Approved !== true) return;
+
+        const name = row.Name;
+        const x = parseFloat(row.X);
+        const y = parseFloat(row.Y);
+        const typ = row.Typ;
+        const beschreibung = row.Beschreibung;
+        const wiki = row.Wiki;
+
+        // Sicherheitscheck
+        if (!name || isNaN(x) || isNaN(y)) return;
+
+        let popupContent = `<b>${name}</b><br>${beschreibung || ""}`;
+
+        if (wiki) {
+          popupContent += `<br><a href="${wiki}" target="_blank">Wiki öffnen</a>`;
+        }
+
+        L.marker([y, x]).addTo(map)
+          .bindPopup(popupContent);
+
+      });
+
+    })
+    .catch(err => console.error("Fehler beim Laden:", err));
 
 </script>
 
