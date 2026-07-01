@@ -20,7 +20,7 @@
       width: 100%;
     }
 
-    /* 🔍 SUCHE */
+    /* 🔍 SEARCH */
     #searchBox {
       position: absolute;
       top: 10px;
@@ -52,17 +52,27 @@
       background: #eee;
     }
 
-    /* 📏 MESSBOX */
+    /* 🧭 INFO BOX (Koordinaten + ggf. Status) */
+    #infoBox {
+      margin-top: 5px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 6px 10px;
+      font-size: 13px;
+    }
+
+    /* 📏 MEASURE BOX */
     #measureBox {
       position: absolute;
-      top: 60px;
+      top: 120px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 1000;
-      background: rgba(0,0,0,0.8);
+      background: rgba(0,0,0,0.85);
       color: white;
       padding: 8px;
       font-size: 14px;
+      display: none;
     }
 
     /* 🧭 TOOLBOX */
@@ -82,6 +92,15 @@
       margin: 4px 0;
       padding: 6px;
       cursor: pointer;
+      border: none;
+      color: white;
+      background: #444;
+    }
+
+    #toolBox button.active {
+      background: #4da3ff;
+      color: black;
+      font-weight: bold;
     }
 
   </style>
@@ -93,6 +112,7 @@
 <div id="searchBox">
   <input id="searchInput" type="text" placeholder="Ort suchen..." />
   <div id="suggestions"></div>
+  <div id="infoBox">Bereit</div>
 </div>
 
 <!-- 📏 MEASURE -->
@@ -101,9 +121,9 @@
   <button id="resetBtn">Zurücksetzen</button>
 </div>
 
-<!-- 🧭 TOOL SWITCH -->
+<!-- 🧭 TOOLBOX -->
 <div id="toolBox">
-  <button id="modeCoords">Koordinaten</button>
+  <button id="modeCoords" class="active">Koordinaten</button>
   <button id="modeMeasure">Messen</button>
 </div>
 
@@ -138,40 +158,38 @@
   map.setMaxBounds(bounds);
 
   // =========================
-  // 🧭 KOORDINATENBOX
-  // =========================
-
-  var coordBox = L.control({position: 'bottomleft'});
-
-  coordBox.onAdd = function () {
-    this._div = L.DomUtil.create('div', 'coordBox');
-    this._div.style.background = "rgba(0,0,0,0.7)";
-    this._div.style.color = "white";
-    this._div.style.padding = "6px 10px";
-    this._div.style.fontSize = "14px";
-    this._div.innerHTML = "Klick auf die Karte";
-    return this._div;
-  };
-
-  coordBox.addTo(map);
-
-  // =========================
-  // 🧭 TOOL MODES
+  // 🧭 TOOL STATE
   // =========================
 
   let activeMode = "coords";
 
-  document.getElementById("modeCoords").onclick = () => {
-    activeMode = "coords";
-    resetMeasure();
-  };
+  const modeCoordsBtn = document.getElementById("modeCoords");
+  const modeMeasureBtn = document.getElementById("modeMeasure");
 
-  document.getElementById("modeMeasure").onclick = () => {
-    activeMode = "measure";
-  };
+  function setMode(mode) {
+    activeMode = mode;
+
+    modeCoordsBtn.classList.remove("active");
+    modeMeasureBtn.classList.remove("active");
+
+    if (mode === "coords") {
+      modeCoordsBtn.classList.add("active");
+      document.getElementById("measureBox").style.display = "none";
+    }
+
+    if (mode === "measure") {
+      modeMeasureBtn.classList.add("active");
+      document.getElementById("measureBox").style.display = "block";
+    }
+  }
+
+  modeCoordsBtn.onclick = () => setMode("coords");
+  modeMeasureBtn.onclick = () => setMode("measure");
+
+  setMode("coords");
 
   // =========================
-  // 📏 MESS SYSTEM
+  // 📏 MEASURE SYSTEM
   // =========================
 
   const PIXEL_TO_MILES = 150 / 1000;
@@ -207,8 +225,10 @@
   document.getElementById("resetBtn").onclick = resetMeasure;
 
   // =========================
-  // 🖱️ CLICK ROUTER
+  // 🖱️ MAP CLICK
   // =========================
+
+  const infoBox = document.getElementById("infoBox");
 
   map.on('click', function(e) {
 
@@ -218,8 +238,7 @@
 
     // 🧭 COORD MODE
     if (activeMode === "coords") {
-      coordBox._div.innerHTML =
-        "X: " + Math.round(x) + " | Y: " + Math.round(y);
+      infoBox.innerHTML = "X: " + Math.round(x) + " | Y: " + Math.round(y);
       return;
     }
 
@@ -252,10 +271,8 @@
 
   });
 
-  updateMeasureUI();
-
   // =========================
-  // 📡 GOOGLE SHEET DATA
+  // 📡 GOOGLE SHEET
   // =========================
 
   const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
@@ -287,23 +304,35 @@
         const marker = L.marker([y, x]).addTo(map)
           .bindPopup(popup);
 
-        allMarkers.push({
-          name,
-          marker,
-          x,
-          y
-        });
+        allMarkers.push({ name, marker, x, y });
 
       });
 
     });
 
   // =========================
-  // 🔍 SEARCH
+  // 🔍 SEARCH + ENTER LOGIC
   // =========================
 
   const input = document.getElementById("searchInput");
   const suggestions = document.getElementById("suggestions");
+
+  function goToMarker(name) {
+
+    const match = allMarkers.find(m =>
+      m.name.toLowerCase() === name.toLowerCase()
+    );
+
+    if (match) {
+      map.setView([match.y, match.x], 1);
+      match.marker.openPopup();
+      infoBox.innerHTML = "Gefunden: " + match.name;
+      return true;
+    }
+
+    infoBox.innerHTML = "❌ Nicht vorhanden";
+    return false;
+  }
 
   input.addEventListener("input", function() {
 
@@ -323,8 +352,7 @@
       div.textContent = m.name;
 
       div.onclick = () => {
-        map.setView([m.y, m.x], 1);
-        m.marker.openPopup();
+        goToMarker(m.name);
         suggestions.innerHTML = "";
         input.value = m.name;
       };
@@ -332,6 +360,13 @@
       suggestions.appendChild(div);
     });
 
+  });
+
+  input.addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      goToMarker(input.value);
+      suggestions.innerHTML = "";
+    }
   });
 
 </script>
