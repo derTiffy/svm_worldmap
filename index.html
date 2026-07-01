@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 <head>
   <meta charset="utf-8" />
@@ -53,6 +54,7 @@
     }
 
   </style>
+
 </head>
 
 <body>
@@ -85,7 +87,7 @@
   L.imageOverlay(imageUrl, bounds).addTo(map);
 
   map.fitBounds(bounds);
-  map.setZoom(-2); //oder - 1 / -2.5 je nach Geschmack
+  map.setZoom(-2);
 
   map.setMaxBounds(bounds);
 
@@ -123,9 +125,12 @@
     .then(res => res.json())
     .then(data => {
 
+      console.log(data); // Debug
+
       data.forEach(row => {
 
-        if (row.Approved !== true) return;
+        // ✅ FIX: erkennt TRUE egal ob Boolean oder String
+        if (String(row.Approved).toLowerCase() !== "true") return;
 
         const name = row.Name;
         const x = parseFloat(row.X);
