@@ -58,6 +58,36 @@
   map.setMaxBounds(bounds);
 
   // =========================
+// 🧭 KOORDINATEN ANZEIGEN
+// =========================
+
+var coordBox = L.control({position: 'bottomleft'});
+
+coordBox.onAdd = function () {
+  this._div = L.DomUtil.create('div', 'coordBox');
+  this._div.style.background = "rgba(0,0,0,0.7)";
+  this._div.style.color = "white";
+  this._div.style.padding = "6px 10px";
+  this._div.style.fontSize = "14px";
+  this._div.innerHTML = "Klick auf die Karte";
+  return this._div;
+};
+
+coordBox.addTo(map);
+
+// Beim Klick Koordinaten anzeigen
+map.on('click', function(e) {
+
+  var x = Math.round(e.latlng.lng);
+  var y = Math.round(e.latlng.lat);
+
+  coordBox._div.innerHTML =
+    "X: " + x + " | Y: " + y;
+
+});
+
+
+  // =========================
   // 📍 PINS / ORTE
   // =========================
 
