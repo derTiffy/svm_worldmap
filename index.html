@@ -49,6 +49,7 @@
   L.imageOverlay(imageUrl, bounds).addTo(map);
 
   map.fitBounds(bounds);
+  map.setZoom(-2); // oder -1 / -2.5 je nach Geschmack
   map.setMaxBounds(bounds);
 
   // =========================
