@@ -11,8 +11,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background: black; /* schöner Rand statt abgeschnitten */
-      overflow: hidden;
+      background: black; /* verhindert abgeschnittene Optik */
     }
 
     #map {
@@ -27,13 +26,9 @@
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 <script>
 
-// =========================
-// 🗺️ KARTE INITIALISIEREN
-// =========================
-
+// Karte erstellen
 var map = L.map('map', {
   crs: L.CRS.Simple,
   minZoom: -3,
@@ -41,27 +36,22 @@ var map = L.map('map', {
   zoomSnap: 0.25
 });
 
-
-// =========================
-// 🖼️ BILD EINBINDEN
-// =========================
-
+// Bildgröße deiner Karte
 var bounds = [[0, 0], [9716, 11212]];
 
+// Bild laden
 L.imageOverlay('map.jpg', bounds).addTo(map);
 
-
-// 👉 WICHTIG: komplette Karte anzeigen (automatisch!)
+// 👉 AUTOMATISCHER MAX ZOOM OUT
 map.fitBounds(bounds, {
-  padding: [20, 20],
+  padding: [10, 10],   // kleiner Rand statt Abschneiden
   animate: false
 });
 
+</script>
+<script>
 
-// =========================
-// 📍 MARKER LADEN
-// =========================
-
+// 👉 HIER DEINE URL EINTRAGEN !!!
 fetch("https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec")
   .then(res => res.json())
   .then(data => {
@@ -74,6 +64,7 @@ fetch("https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8
 
       function updateMarker() {
 
+        // Marker nur anzeigen wenn Zoom passt
         if (map.getZoom() < zoomLevel) {
           if (p._marker) {
             map.removeLayer(p._marker);
@@ -82,6 +73,7 @@ fetch("https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8
           return;
         }
 
+        // Marker erstellen
         if (!p._marker) {
 
           let size = p["Markergröße"] || 30;
@@ -101,6 +93,7 @@ fetch("https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8
         }
       }
 
+      // Initial + bei Zoom
       updateMarker();
       map.on("zoomend", updateMarker);
 
@@ -109,6 +102,5 @@ fetch("https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8
   });
 
 </script>
-
 </body>
 </html>
