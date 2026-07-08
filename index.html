@@ -20,7 +20,6 @@
       width: 100%;
     }
 
-    /* 🔍 SEARCH */
     #searchBox {
       position: absolute;
       top: 10px;
@@ -52,7 +51,6 @@
       background: #eee;
     }
 
-    /* 🧭 INFO BOX (Koordinaten + ggf. Status) */
     #infoBox {
       margin-top: 5px;
       background: rgba(0,0,0,0.7);
@@ -61,7 +59,6 @@
       font-size: 13px;
     }
 
-    /* 📏 MEASURE BOX */
     #measureBox {
       position: absolute;
       top: 120px;
@@ -75,7 +72,6 @@
       display: none;
     }
 
-    /* 🧭 TOOLBOX */
     #toolBox {
       position: absolute;
       top: 10px;
@@ -102,26 +98,19 @@
       color: black;
       font-weight: bold;
     }
-
   </style>
 </head>
 
 <body>
 
-<!-- 🔍 SEARCH -->
 <div id="searchBox">
   <input id="searchInput" type="text" placeholder="Ort suchen..." />
   <div id="suggestions"></div>
   <div id="infoBox">Bereit</div>
 </div>
 
-<!-- 📏 MEASURE -->
-<div id="measureBox">
-  Strecke: 0 mi / 0 km<br>
-  <button id="resetBtn">Zurücksetzen</button>
-</div>
+<div id="measureBox"></div>
 
-<!-- 🧭 TOOLBOX -->
 <div id="toolBox">
   <button id="modeCoords" class="active">Koordinaten</button>
   <button id="modeMeasure">Messen</button>
@@ -133,241 +122,102 @@
 
 <script>
 
-  // =========================
-  // 🗺️ MAP
-  // =========================
+var map = L.map('map', {
+  crs: L.CRS.Simple,
+  minZoom: -3,
+  maxZoom: 5,
+  zoomSnap: 0.25
+});
 
-  var map = L.map('map', {
-    crs: L.CRS.Simple,
-    minZoom: -3,
-    maxZoom: 5,
-    zoomSnap: 0.25
+var imageUrl = "https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
+
+var w = 11212;
+var h = 9716;
+var bounds = [[0, 0], [h, w]];
+
+L.imageOverlay(imageUrl, bounds).addTo(map);
+map.fitBounds(bounds);
+map.setZoom(-2);
+map.setMaxBounds(bounds);
+
+// =========================
+// 📍 MARKER ICON SYSTEM
+// =========================
+
+const BASE_SIZE = 32;
+
+function createIcon(size) {
+  return L.icon({
+    iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+    shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+    iconSize: [size, size * 1.5],
+    iconAnchor: [size / 2, size * 1.5],
+    popupAnchor: [0, -size]
   });
+}
 
-  var imageUrl = "https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
+function getScaledSize() {
+  const zoom = map.getZoom();
 
-  var w = 11212;
-  var h = 9716;
+  // Skaliert zwischen -3 und 1
+  const minZoom = -3;
+  const maxZoom = 1;
 
-  var bounds = [[0, 0], [h, w]];
+  const t = Math.min(1, Math.max(0, (zoom - minZoom) / (maxZoom - minZoom)));
 
-  L.imageOverlay(imageUrl, bounds).addTo(map);
+  return BASE_SIZE * (0.5 + 0.5 * t); // 50% → 100%
+}
 
-  map.fitBounds(bounds);
-  map.setZoom(-2);
-  map.setMaxBounds(bounds);
+function updateMarkerSize() {
+  const size = getScaledSize();
 
-  // =========================
-  // 🧭 TOOL STATE
-  // =========================
+  allMarkers.forEach(m => {
+    m.marker.setIcon(createIcon(size));
+  });
+}
 
-  let activeMode = "coords";
+map.on("zoomend", updateMarkerSize);
 
-  const modeCoordsBtn = document.getElementById("modeCoords");
-  const modeMeasureBtn = document.getElementById("modeMeasure");
+// =========================
+// 📡 GOOGLE SHEET
+// =========================
 
-  function setMode(mode) {
-    activeMode = mode;
+const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
 
-    modeCoordsBtn.classList.remove("active");
-    modeMeasureBtn.classList.remove("active");
+let allMarkers = [];
 
-    if (mode === "coords") {
-      modeCoordsBtn.classList.add("active");
-      document.getElementById("measureBox").style.display = "none";
+fetch(sheetURL)
+.then(res => res.json())
+.then(data => {
+
+  data.forEach(row => {
+
+    if (String(row.Approved).toLowerCase() !== "true") return;
+
+    const name = row.Name;
+    const x = parseFloat(row.X);
+    const y = parseFloat(row.Y);
+    const beschreibung = row.Beschreibung;
+    const wiki = row.Wiki;
+
+    if (!name || isNaN(x) || isNaN(y)) return;
+
+    let popup = `<b>${name}</b><br>${beschreibung || ""}`;
+
+    if (wiki) {
+      popup += `<br><a href="${wiki}" target="_blank">Wiki öffnen</a>`;
     }
 
-    if (mode === "measure") {
-      modeMeasureBtn.classList.add("active");
-      document.getElementById("measureBox").style.display = "block";
-    }
-  }
+    const marker = L.marker([y, x], {
+      icon: createIcon(BASE_SIZE)
+    }).addTo(map).bindPopup(popup);
 
-  modeCoordsBtn.onclick = () => setMode("coords");
-  modeMeasureBtn.onclick = () => setMode("measure");
-
-  setMode("coords");
-
-  // =========================
-  // 📏 MEASURE SYSTEM
-  // =========================
-
-  const PIXEL_TO_MILES = 150 / 9676;
-  const MILES_TO_KM = 1.60934;
-
-  let measurePoints = [];
-  let measureLayers = [];
-  let totalDistance = 0;
-
-  const measureBox = document.getElementById("measureBox");
-
-  function updateMeasureUI() {
-    const km = totalDistance * MILES_TO_KM;
-
-    measureBox.innerHTML = `
-      Strecke: ${totalDistance.toFixed(2)} mi / ${km.toFixed(2)} km<br>
-      <button id="resetBtn">Zurücksetzen</button>
-    `;
-
-    document.getElementById("resetBtn").onclick = resetMeasure;
-  }
-
-  function resetMeasure() {
-    measurePoints = [];
-    totalDistance = 0;
-
-    measureLayers.forEach(l => map.removeLayer(l));
-    measureLayers = [];
-
-    updateMeasureUI();
-  }
-
-  document.getElementById("resetBtn").onclick = resetMeasure;
-
-  // =========================
-  // 🖱️ MAP CLICK
-  // =========================
-
-  const infoBox = document.getElementById("infoBox");
-
-  map.on('click', function(e) {
-
-    const x = e.latlng.lng;
-    const y = e.latlng.lat;
-    const point = [y, x];
-
-    // 🧭 COORD MODE
-    if (activeMode === "coords") {
-      infoBox.innerHTML = "X: " + Math.round(x) + " | Y: " + Math.round(y);
-      return;
-    }
-
-    // 📏 MEASURE MODE
-    if (activeMode === "measure") {
-
-      measurePoints.push(point);
-
-      const marker = L.circleMarker(point, {radius: 4}).addTo(map);
-      measureLayers.push(marker);
-
-      if (measurePoints.length > 1) {
-
-        const prev = measurePoints[measurePoints.length - 2];
-
-        const dx = point[1] - prev[1];
-        const dy = point[0] - prev[0];
-
-        const pixelDist = Math.sqrt(dx*dx + dy*dy);
-        const miles = pixelDist * PIXEL_TO_MILES;
-
-        totalDistance += miles;
-
-        const line = L.polyline([prev, point]).addTo(map);
-        measureLayers.push(line);
-      }
-
-      updateMeasureUI();
-    }
+    allMarkers.push({ name, marker, x, y });
 
   });
 
-  // =========================
-  // 📡 GOOGLE SHEET
-  // =========================
-
-  const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
-
-  let allMarkers = [];
-
-  fetch(sheetURL)
-    .then(res => res.json())
-    .then(data => {
-
-      data.forEach(row => {
-
-        if (String(row.Approved).toLowerCase() !== "true") return;
-
-        const name = row.Name;
-        const x = parseFloat(row.X);
-        const y = parseFloat(row.Y);
-        const beschreibung = row.Beschreibung;
-        const wiki = row.Wiki;
-
-        if (!name || isNaN(x) || isNaN(y)) return;
-
-        let popup = `<b>${name}</b><br>${beschreibung || ""}`;
-
-        if (wiki) {
-          popup += `<br><a href="${wiki}" target="_blank">Wiki öffnen</a>`;
-        }
-
-        const marker = L.marker([y, x]).addTo(map)
-          .bindPopup(popup);
-
-        allMarkers.push({ name, marker, x, y });
-
-      });
-
-    });
-
-  // =========================
-  // 🔍 SEARCH + ENTER LOGIC
-  // =========================
-
-  const input = document.getElementById("searchInput");
-  const suggestions = document.getElementById("suggestions");
-
-  function goToMarker(name) {
-
-    const match = allMarkers.find(m =>
-      m.name.toLowerCase() === name.toLowerCase()
-    );
-
-    if (match) {
-      map.setView([match.y, match.x], 1);
-      match.marker.openPopup();
-      infoBox.innerHTML = "Gefunden: " + match.name;
-      return true;
-    }
-
-    infoBox.innerHTML = "❌ Nicht vorhanden";
-    return false;
-  }
-
-  input.addEventListener("input", function() {
-
-    const value = input.value.toLowerCase();
-    suggestions.innerHTML = "";
-
-    if (!value) return;
-
-    const matches = allMarkers.filter(m =>
-      m.name.toLowerCase().includes(value)
-    );
-
-    matches.slice(0, 10).forEach(m => {
-
-      const div = document.createElement("div");
-      div.className = "suggestion-item";
-      div.textContent = m.name;
-
-      div.onclick = () => {
-        goToMarker(m.name);
-        suggestions.innerHTML = "";
-        input.value = m.name;
-      };
-
-      suggestions.appendChild(div);
-    });
-
-  });
-
-  input.addEventListener("keydown", function(e) {
-    if (e.key === "Enter") {
-      goToMarker(input.value);
-      suggestions.innerHTML = "";
-    }
-  });
+  updateMarkerSize(); // initial setzen
+});
 
 </script>
 
