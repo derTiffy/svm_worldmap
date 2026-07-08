@@ -141,7 +141,7 @@ map.setZoom(-2);
 map.setMaxBounds(bounds);
 
 // =========================
-// 📍 MARKER ICON SYSTEM (NO SHADOW)
+// 📍 SMOOTH MARKER SYSTEM
 // =========================
 
 const BASE_SIZE = 32;
@@ -163,7 +163,8 @@ function getScaledSize() {
 
   const t = Math.min(1, Math.max(0, (zoom - minZoom) / (maxZoom - minZoom)));
 
-  return BASE_SIZE * (0.5 + 0.5 * t);
+  // 🔥 sanftere Skalierung (60% → 100%)
+  return BASE_SIZE * (0.6 + 0.4 * t);
 }
 
 function updateMarkerSize() {
@@ -174,7 +175,8 @@ function updateMarkerSize() {
   });
 }
 
-map.on("zoomend", updateMarkerSize);
+// 🔥 WICHTIG: jetzt smooth
+map.on("zoom", updateMarkerSize);
 
 // =========================
 // 📡 GOOGLE SHEET
