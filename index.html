@@ -77,17 +77,30 @@ let measureLine=null;
 
 const infoBox = document.getElementById("infoBox");
 
-// ========================= ICON SYSTEM (FIXED) =========================
+// ========================= ICON SYSTEM (FIXED FINAL) =========================
 
 function resolveIcon(icon){
 
-  if(!icon || String(icon).trim()===""){
+  // NULL / UNDEFINED
+  if(icon === null || icon === undefined){
+    return {type:"emoji", value:"📍"};
+  }
+
+  // OBJEKT (z.B. aus Upload)
+  if(typeof icon === "object"){
+    if(icon.url){
+      return resolveIcon(icon.url);
+    }
     return {type:"emoji", value:"📍"};
   }
 
   let val = String(icon).trim();
 
-  // GOOGLE DRIVE
+  if(val === ""){
+    return {type:"emoji", value:"📍"};
+  }
+
+  // GOOGLE DRIVE (alle Varianten)
   let match = val.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if(match){
     return {type:"image", value:"https://drive.google.com/uc?export=view&id="+match[1]};
@@ -105,7 +118,7 @@ function resolveIcon(icon){
     return {type:"image", value:val};
   }
 
-  // EMOJI (jetzt korrekt!)
+  // EMOJI / TEXT
   return {type:"emoji", value:val};
 }
 
@@ -164,6 +177,15 @@ const icon=row["Icon"];
 
 let popup=`<b>${name}</b><br>${row.Beschreibung||""}`;
 
+// ✅ BILD (NEU)
+if(row.Bild){
+  let img = resolveIcon(row.Bild);
+  if(img.type==="image"){
+    popup += `<br><img src="${img.value}" style="width:100%;margin-top:8px;border-radius:6px;">`;
+  }
+}
+
+// ✅ WIKI FIX
 if(row.Wiki && row.Wiki.trim().startsWith("http")){
 popup+=`<br><br><a href="${row.Wiki}" target="_blank">Wiki öffnen</a>`;
 }
