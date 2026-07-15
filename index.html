@@ -35,11 +35,13 @@ html, body {
   width:300px;
 }
 
+
 #searchInput {
   width:100%;
   padding:8px;
   font-size:14px;
 }
+
 
 #suggestions {
   background:white;
@@ -48,14 +50,17 @@ html, body {
   border:1px solid #ccc;
 }
 
+
 .suggestion-item {
   padding:6px;
   cursor:pointer;
 }
 
+
 .suggestion-item:hover {
   background:#eee;
 }
+
 
 #infoBox {
   margin-top:5px;
@@ -66,36 +71,49 @@ html, body {
 }
 
 
+
 /* =========================
    TOOLS
 ========================= */
 
 #toolBox {
+
   position:absolute;
   top:10px;
   right:10px;
   z-index:1000;
+
   background:rgba(0,0,0,0.8);
   padding:6px;
   border-radius:6px;
+
 }
 
+
 #toolBox button {
+
   display:block;
   width:140px;
   margin:4px 0;
   padding:6px;
+
   cursor:pointer;
   border:none;
+
   color:white;
   background:#444;
+
 }
 
+
 #toolBox button.active {
+
   background:#4da3ff;
   color:black;
   font-weight:bold;
+
 }
+
 
 
 /* =========================
@@ -103,17 +121,85 @@ html, body {
 ========================= */
 
 #measureBox {
+
   position:absolute;
   top:120px;
   left:50%;
   transform:translateX(-50%);
+
   z-index:1000;
+
   background:rgba(0,0,0,0.85);
   color:white;
+
   padding:8px;
+
   font-size:14px;
+
   display:none;
+
 }
+
+
+
+/* =========================
+   LEGENDE
+========================= */
+
+.leaflet-control.legend-control {
+
+  background:none;
+  border:none;
+  box-shadow:none;
+
+  color:white;
+
+  padding:5px;
+
+  font-size:14px;
+
+  line-height:22px;
+
+}
+
+
+.legend-item {
+
+  display:flex;
+
+  align-items:center;
+
+  gap:6px;
+
+  white-space:nowrap;
+
+}
+
+
+.legend-icon {
+
+  width:22px;
+
+  height:22px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+}
+
+
+.legend-icon img {
+
+  max-width:22px;
+
+  max-height:22px;
+
+}
+
+
 
 </style>
 
@@ -121,6 +207,7 @@ html, body {
 
 
 <body>
+
 
 
 <div id="searchBox">
@@ -136,7 +223,11 @@ Bereit
 </div>
 
 
+
+
 <div id="measureBox"></div>
+
+
 
 
 <div id="toolBox">
@@ -152,10 +243,15 @@ Messen
 </div>
 
 
+
+
 <div id="map"></div>
 
 
+
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
 
 
 <script>
@@ -164,6 +260,7 @@ Messen
 // =========================
 // KARTE
 // =========================
+
 
 var map = L.map('map', {
 
@@ -178,13 +275,16 @@ var map = L.map('map', {
 });
 
 
+
 var imageUrl =
 "https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
+
 
 
 var w = 11212;
 
 var h = 9716;
+
 
 
 var bounds = [
@@ -196,8 +296,10 @@ var bounds = [
 ];
 
 
+
 L.imageOverlay(imageUrl,bounds)
 .addTo(map);
+
 
 
 map.fitBounds(bounds);
@@ -208,9 +310,11 @@ map.setMaxBounds(bounds);
 
 
 
+
 // =========================
 // GLOBALE VARIABLEN
 // =========================
+
 
 let allMarkers = [];
 
@@ -220,11 +324,14 @@ let measurePoints=[];
 
 let measureLine=null;
 
+let mapLegend=[];
+
 
 
 // =========================
 // KOORDINATEN
 // =========================
+
 
 const infoBox =
 document.getElementById("infoBox");
@@ -233,7 +340,9 @@ document.getElementById("infoBox");
 
 map.on("click",function(e){
 
+
 if(currentMode==="coords"){
+
 
 let x=Math.round(e.latlng.lng);
 
@@ -243,7 +352,9 @@ let y=Math.round(e.latlng.lat);
 infoBox.innerHTML =
 "X: "+x+" | Y: "+y;
 
+
 }
+
 
 });
 
@@ -265,6 +376,7 @@ function resolveIcon(icon){
   }
 
 
+
   let value =
     String(icon).trim();
 
@@ -278,8 +390,6 @@ function resolveIcon(icon){
 
 
 
-
-  // Google Drive Link erkennen
 
   if(value.includes("drive.google.com")){
 
@@ -321,7 +431,6 @@ function resolveIcon(icon){
 
 
 
-
   return value;
 
 
@@ -338,8 +447,6 @@ function createMarkerIcon(icon,size){
     resolveIcon(icon);
 
 
-
-  // Bild
 
   if(
     resolved.startsWith("http")
@@ -375,8 +482,6 @@ function createMarkerIcon(icon,size){
 
 
 
-  // Emoji
-
   let html =
   `<div style="
     font-size:${size}px;
@@ -384,6 +489,7 @@ function createMarkerIcon(icon,size){
   ">
   ${resolved}
   </div>`;
+
 
 
   return L.divIcon({
@@ -405,8 +511,9 @@ function createMarkerIcon(icon,size){
   });
 
 
+
 }
-// =========================
+ // =========================
 // GOOGLE SCRIPT
 // =========================
 
@@ -423,7 +530,36 @@ fetch(sheetURL)
 .then(data=>{
 
 
-data.forEach(row=>{
+// =========================
+// DATEN TRENNEN
+// =========================
+
+
+const pois =
+data.pois || [];
+
+
+mapLegend =
+data.legend || [];
+
+
+
+// =========================
+// LEGENDE ERSTELLEN
+// =========================
+
+
+createMapLegend(mapLegend);
+
+
+
+
+// =========================
+// MARKER LADEN
+// =========================
+
+
+pois.forEach(row=>{
 
 
 if(row.Approved!==true){
@@ -434,11 +570,16 @@ return;
 
 
 
-const name=row.Name;
+const name =
+row.Name;
 
-const x=parseFloat(row.X);
 
-const y=parseFloat(row.Y);
+const x =
+parseFloat(row.X);
+
+
+const y =
+parseFloat(row.Y);
 
 
 
@@ -447,6 +588,7 @@ if(!name || isNaN(x) || isNaN(y)){
 return;
 
 }
+
 
 
 
@@ -478,7 +620,6 @@ let popup =
 
 
 
-// Wiki nur wenn vorhanden
 
 if(
 row.Wiki &&
@@ -487,12 +628,16 @@ String(row.Wiki).trim() !== ""
 
 
 popup +=
+
 `<br><br>
 <a href="${row.Wiki}" target="_blank">
 Wiki öffnen
 </a>`;
 
+
 }
+
+
 
 
 
@@ -546,6 +691,174 @@ updateMarkerVisibility();
 
 
 
+
+
+// =========================
+// LEAFLET LEGENDE
+// =========================
+
+
+function createMapLegend(legend){
+
+
+
+if(!legend || legend.length===0){
+
+return;
+
+}
+
+
+
+
+let LegendControl =
+L.Control.extend({
+
+
+
+options:{
+
+position:"topleft"
+
+},
+
+
+
+
+onAdd:function(){
+
+
+
+let div =
+L.DomUtil.create(
+"div",
+"legend-control"
+);
+
+
+
+
+
+legend.forEach(item=>{
+
+
+
+let row =
+document.createElement("div");
+
+row.className =
+"legend-item";
+
+
+
+
+
+let icon =
+resolveIcon(item.Icon);
+
+
+
+
+
+let iconBox =
+document.createElement("div");
+
+iconBox.className =
+"legend-icon";
+
+
+
+
+
+if(icon.startsWith("http")){
+
+
+
+let img =
+document.createElement("img");
+
+
+img.src =
+icon;
+
+
+iconBox.appendChild(img);
+
+
+
+}
+
+else{
+
+
+iconBox.innerHTML =
+icon;
+
+
+}
+
+
+
+
+
+let text =
+document.createElement("span");
+
+
+text.innerHTML =
+item.Typ;
+
+
+
+
+
+row.appendChild(iconBox);
+
+row.appendChild(text);
+
+
+
+div.appendChild(row);
+
+
+
+});
+
+
+
+
+
+
+L.DomEvent.disableClickPropagation(div);
+
+
+return div;
+
+
+}
+
+
+
+});
+
+
+
+
+map.addControl(
+new LegendControl()
+);
+
+
+
+}
+
+
+
+
+
+
+
+
 // =========================
 // ZOOM SICHTBARKEIT
 // =========================
@@ -586,11 +899,13 @@ map.removeLayer(m.marker);
 }
 
 
+
 }
 
 
 
 });
+
 
 
 }
@@ -601,12 +916,7 @@ map.on(
 "zoomend",
 updateMarkerVisibility
 );
-
-
-
-
-
-// =========================
+  // =========================
 // SUCHE
 // =========================
 
@@ -798,6 +1108,8 @@ suggestions.innerHTML="";
 
 
 
+
+
 // =========================
 // TOOL UMSCHALTUNG
 // =========================
@@ -843,6 +1155,7 @@ clearMeasurement();
 
 
 
+
 modeMeasure.onclick=function(){
 
 
@@ -867,6 +1180,8 @@ measureBox.innerHTML =
 
 
 };
+
+
 
 
 
@@ -904,6 +1219,7 @@ map.removeLayer(measureLine);
 
 
 measureLine =
+
 L.polyline(
 
 measurePoints,
@@ -934,6 +1250,7 @@ updateMeasurement();
 
 
 
+
 function updateMeasurement(){
 
 
@@ -951,18 +1268,23 @@ i++
 
 
 let dx =
+
 measurePoints[i].lng -
+
 measurePoints[i-1].lng;
 
 
 
 let dy =
+
 measurePoints[i].lat -
+
 measurePoints[i-1].lat;
 
 
 
 total +=
+
 Math.sqrt(
 dx*dx+dy*dy
 );
@@ -976,11 +1298,13 @@ dx*dx+dy*dy
 
 
 let miles =
+
 total / 1000 * 150;
 
 
 
 let km =
+
 miles * 1.60934;
 
 
@@ -990,23 +1314,33 @@ miles * 1.60934;
 measureBox.innerHTML =
 
 "Punkte: "
+
 +
+
 measurePoints.length
 
 +
 
 "<br>Strecke: "
+
 +
+
 miles.toFixed(1)
+
 +
+
 " Meilen"
 
 +
 
 "<br>"
+
 +
+
 km.toFixed(1)
+
 +
+
 " km"
 
 +
@@ -1020,6 +1354,7 @@ km.toFixed(1)
 
 
 }
+
 
 
 
@@ -1053,6 +1388,7 @@ if(currentMode==="measure"){
 
 
 measureBox.innerHTML =
+
 "Messung aktiv<br>Punkte setzen";
 
 
