@@ -71,7 +71,6 @@ html, body {
 }
 
 
-
 /* =========================
    TOOLS
 ========================= */
@@ -146,6 +145,7 @@ html, body {
    LEGENDE
 ========================= */
 
+
 .leaflet-control.legend-control {
 
   background:none;
@@ -158,44 +158,40 @@ html, body {
 
   font-size:14px;
 
-  line-height:22px;
+  line-height:24px;
 
 }
+
 
 
 .legend-item {
 
   display:flex;
-
   align-items:center;
-
   gap:6px;
-
-  white-space:nowrap;
 
 }
 
 
+
 .legend-icon {
 
-  width:22px;
-
-  height:22px;
+  width:24px;
+  height:24px;
 
   display:flex;
 
   align-items:center;
-
   justify-content:center;
 
 }
 
 
+
 .legend-icon img {
 
-  max-width:22px;
-
-  max-height:22px;
+  max-width:24px;
+  max-height:24px;
 
 }
 
@@ -224,9 +220,7 @@ Bereit
 
 
 
-
 <div id="measureBox"></div>
-
 
 
 
@@ -244,14 +238,11 @@ Messen
 
 
 
-
 <div id="map"></div>
 
 
 
-
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-
 
 
 <script>
@@ -282,7 +273,6 @@ var imageUrl =
 
 
 var w = 11212;
-
 var h = 9716;
 
 
@@ -311,12 +301,13 @@ map.setMaxBounds(bounds);
 
 
 
+
 // =========================
-// GLOBALE VARIABLEN
+// VARIABLEN
 // =========================
 
 
-let allMarkers = [];
+let allMarkers=[];
 
 let currentMode="coords";
 
@@ -325,6 +316,8 @@ let measurePoints=[];
 let measureLine=null;
 
 let mapLegend=[];
+
+
 
 
 
@@ -349,14 +342,17 @@ let x=Math.round(e.latlng.lng);
 let y=Math.round(e.latlng.lat);
 
 
+
 infoBox.innerHTML =
 "X: "+x+" | Y: "+y;
+
 
 
 }
 
 
 });
+
 
 
 
@@ -369,72 +365,103 @@ infoBox.innerHTML =
 function resolveIcon(icon){
 
 
-  if(!icon){
+if(!icon){
 
-    return "📍";
+return "📍";
 
-  }
-
-
-
-  let value =
-    String(icon).trim();
+}
 
 
 
-  if(value===""){
-
-    return "📍";
-
-  }
+let value =
+String(icon).trim();
 
 
 
+if(value===""){
 
-  if(value.includes("drive.google.com")){
+return "📍";
 
-
-    let match =
-      value.match(/\/d\/([a-zA-Z0-9_-]+)/);
-
-
-
-    if(match){
-
-
-      return
-      "https://drive.google.com/uc?export=view&id="
-      +match[1];
-
-
-    }
+}
 
 
 
-    let id =
-      value.match(/[-\w]{25,}/);
+
+// Google Drive
+
+if(value.includes("drive.google.com")){
+
+
+let id =
+value.match(/[-\w]{25,}/);
 
 
 
-    if(id){
+if(id){
 
 
-      return
-      "https://drive.google.com/uc?export=view&id="
-      +id[0];
-
-
-    }
-
-
-  }
-
-
-
-  return value;
+return "https://drive.google.com/uc?export=view&id="+id[0];
 
 
 }
+
+
+}
+
+
+
+
+return value;
+
+
+}
+
+
+
+
+
+
+
+function isImage(icon){
+
+
+return (
+
+icon.startsWith("http")
+
+&&
+
+(
+
+icon.includes("googleusercontent")
+
+||
+
+icon.includes("drive.google")
+
+||
+
+icon.includes(".png")
+
+||
+
+icon.includes(".jpg")
+
+||
+
+icon.includes(".jpeg")
+
+||
+
+icon.includes(".webp")
+
+)
+
+);
+
+
+}
+
 
 
 
@@ -443,77 +470,105 @@ function resolveIcon(icon){
 function createMarkerIcon(icon,size){
 
 
-  let resolved =
-    resolveIcon(icon);
+
+let resolved =
+resolveIcon(icon);
 
 
 
-  if(
-    resolved.startsWith("http")
-  ){
-
-
-    return L.icon({
-
-      iconUrl:resolved,
-
-      iconSize:[
-        size,
-        size
-      ],
-
-      iconAnchor:[
-        size/2,
-        size
-      ],
-
-      popupAnchor:[
-        0,
-        -size
-      ],
-
-      shadowUrl:null
-
-    });
-
-
-  }
+if(isImage(resolved)){
 
 
 
-
-  let html =
-  `<div style="
-    font-size:${size}px;
-    transform:translate(-50%,-50%);
-  ">
-  ${resolved}
-  </div>`;
+return L.icon({
 
 
+iconUrl:resolved,
 
-  return L.divIcon({
 
-    html:html,
+iconSize:[
 
-    className:"",
+size,
 
-    iconSize:[
-      size,
-      size
-    ],
+size
 
-    iconAnchor:[
-      size/2,
-      size/2
-    ]
+],
 
-  });
+
+iconAnchor:[
+
+size/2,
+
+size
+
+],
+
+
+popupAnchor:[
+
+0,
+
+-size
+
+],
+
+
+shadowUrl:null
+
+
+});
 
 
 
 }
- // =========================
+
+
+
+
+
+return L.divIcon({
+
+
+html:
+
+`
+<div style="
+font-size:${size}px;
+transform:translate(-50%,-50%);
+">
+${resolved}
+</div>
+`,
+
+
+
+className:"",
+
+
+iconSize:[size,size],
+
+
+iconAnchor:[
+
+size/2,
+
+size/2
+
+]
+
+
+
+});
+
+
+
+}
+
+
+
+
+
+// =========================
 // GOOGLE SCRIPT
 // =========================
 
@@ -530,33 +585,34 @@ fetch(sheetURL)
 .then(data=>{
 
 
-// =========================
-// DATEN TRENNEN
-// =========================
-
-
-const pois =
-data.pois || [];
-
-
-mapLegend =
-data.legend || [];
+let pois=[];
 
 
 
-// =========================
-// LEGENDE ERSTELLEN
-// =========================
+if(Array.isArray(data)){
+
+
+pois=data;
+
+
+}
+
+else{
+
+
+pois=data.pois || [];
+
+mapLegend=data.legend || [];
+
+
+}
+
 
 
 createMapLegend(mapLegend);
 
 
 
-
-// =========================
-// MARKER LADEN
-// =========================
 
 
 pois.forEach(row=>{
@@ -570,16 +626,11 @@ return;
 
 
 
-const name =
-row.Name;
+const name=row.Name;
 
+const x=parseFloat(row.X);
 
-const x =
-parseFloat(row.X);
-
-
-const y =
-parseFloat(row.Y);
+const y=parseFloat(row.Y);
 
 
 
@@ -588,7 +639,6 @@ if(!name || isNaN(x) || isNaN(y)){
 return;
 
 }
-
 
 
 
@@ -607,42 +657,30 @@ row["Icon"] || "📍";
 
 
 
-
-
-// =========================
-// POPUP
-// =========================
-
-
 let popup =
 `<b>${name}</b><br>${row.Beschreibung || ""}`;
 
 
 
-
-
 if(
 row.Wiki &&
-String(row.Wiki).trim() !== ""
+String(row.Wiki).trim()!==""
 ){
 
 
 popup +=
-
-`<br><br>
+`
+<br><br>
 <a href="${row.Wiki}" target="_blank">
 Wiki öffnen
-</a>`;
-
+</a>
+`;
 
 }
 
 
 
-
-
-const marker =
-
+let marker =
 L.marker(
 
 [y,x],
@@ -684,22 +722,13 @@ y:y
 updateMarkerVisibility();
 
 
-
 });
-
-
-
-
-
-
-
 // =========================
-// LEAFLET LEGENDE
+// LEGENDE
 // =========================
 
 
 function createMapLegend(legend){
-
 
 
 if(!legend || legend.length===0){
@@ -710,10 +739,8 @@ return;
 
 
 
-
 let LegendControl =
 L.Control.extend({
-
 
 
 options:{
@@ -724,9 +751,7 @@ position:"topleft"
 
 
 
-
 onAdd:function(){
-
 
 
 let div =
@@ -737,10 +762,7 @@ L.DomUtil.create(
 
 
 
-
-
 legend.forEach(item=>{
-
 
 
 let row =
@@ -751,27 +773,21 @@ row.className =
 
 
 
-
-
 let icon =
 resolveIcon(item.Icon);
-
-
 
 
 
 let iconBox =
 document.createElement("div");
 
+
 iconBox.className =
 "legend-icon";
 
 
 
-
-
-if(icon.startsWith("http")){
-
+if(isImage(icon)){
 
 
 let img =
@@ -783,7 +799,6 @@ icon;
 
 
 iconBox.appendChild(img);
-
 
 
 }
@@ -799,8 +814,6 @@ icon;
 
 
 
-
-
 let text =
 document.createElement("span");
 
@@ -810,12 +823,9 @@ item.Typ;
 
 
 
-
-
 row.appendChild(iconBox);
 
 row.appendChild(text);
-
 
 
 div.appendChild(row);
@@ -827,9 +837,8 @@ div.appendChild(row);
 
 
 
-
-
 L.DomEvent.disableClickPropagation(div);
+
 
 
 return div;
@@ -838,9 +847,7 @@ return div;
 }
 
 
-
 });
-
 
 
 
@@ -849,11 +856,7 @@ new LegendControl()
 );
 
 
-
 }
-
-
-
 
 
 
@@ -878,10 +881,11 @@ allMarkers.forEach(m=>{
 if(zoom >= m.zoom){
 
 
-
 if(!map.hasLayer(m.marker)){
 
+
 m.marker.addTo(map);
+
 
 }
 
@@ -894,7 +898,9 @@ else{
 
 if(map.hasLayer(m.marker)){
 
+
 map.removeLayer(m.marker);
+
 
 }
 
@@ -907,7 +913,6 @@ map.removeLayer(m.marker);
 });
 
 
-
 }
 
 
@@ -916,7 +921,12 @@ map.on(
 "zoomend",
 updateMarkerVisibility
 );
-  // =========================
+
+
+
+
+
+// =========================
 // SUCHE
 // =========================
 
@@ -942,15 +952,16 @@ value.toLowerCase();
 
 return allMarkers.filter(m=>
 
+
 m.name.toLowerCase()
 .includes(text)
+
 
 );
 
 
 
 }
-
 
 
 
@@ -987,10 +998,8 @@ results.slice(0,10)
 .forEach(m=>{
 
 
-
 let div =
 document.createElement("div");
-
 
 
 div.className =
@@ -1005,7 +1014,9 @@ m.name;
 
 div.onclick=function(){
 
+
 goToMarker(m);
+
 
 };
 
@@ -1030,7 +1041,6 @@ suggestions.appendChild(div);
 searchInput.addEventListener(
 "keydown",
 function(e){
-
 
 
 if(e.key==="Enter"){
@@ -1060,7 +1070,6 @@ this.value =
 }
 
 
-
 }
 
 
@@ -1074,7 +1083,6 @@ this.value =
 
 
 function goToMarker(m){
-
 
 
 map.setView(
@@ -1102,9 +1110,7 @@ m.name;
 suggestions.innerHTML="";
 
 
-
 }
-
 
 
 
@@ -1130,10 +1136,12 @@ document.getElementById("measureBox");
 
 
 
+
 modeCoords.onclick=function(){
 
 
 currentMode="coords";
+
 
 
 modeCoords.classList.add("active");
@@ -1141,7 +1149,9 @@ modeCoords.classList.add("active");
 modeMeasure.classList.remove("active");
 
 
+
 measureBox.style.display="none";
+
 
 
 clearMeasurement();
@@ -1180,7 +1190,6 @@ measureBox.innerHTML =
 
 
 };
-
 
 
 
@@ -1250,7 +1259,6 @@ updateMeasurement();
 
 
 
-
 function updateMeasurement(){
 
 
@@ -1266,19 +1274,14 @@ i++
 ){
 
 
-
 let dx =
-
 measurePoints[i].lng -
-
 measurePoints[i-1].lng;
 
 
 
 let dy =
-
 measurePoints[i].lat -
-
 measurePoints[i-1].lat;
 
 
@@ -1295,29 +1298,25 @@ dx*dx+dy*dy
 
 
 
-
-
 let miles =
-
 total / 1000 * 150;
 
 
 
 let km =
-
 miles * 1.60934;
 
 
 
-
-
 measureBox.innerHTML =
+
 
 "Punkte: "
 
 +
 
 measurePoints.length
+
 
 +
 
@@ -1354,7 +1353,6 @@ km.toFixed(1)
 
 
 }
-
 
 
 
@@ -1402,9 +1400,8 @@ measureBox.innerHTML =
 
 
 
-
 // =========================
-// ANFANGSZUSTAND
+// START
 // =========================
 
 
@@ -1417,4 +1414,4 @@ updateMarkerVisibility();
 
 </body>
 
-</html>
+</html>  
