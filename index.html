@@ -7,542 +7,954 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
-html,body{
-    margin:0;
-    padding:0;
-    height:100%;
-    width:100%;
-    background:#000;
+
+html, body {
+  margin:0;
+  padding:0;
+  height:100%;
+  width:100%;
+  background:#000;
 }
 
-#map{
-    height:100vh;
-    width:100%;
+#map {
+  height:100vh;
+  width:100%;
 }
+
 
 /* =========================
-           SUCHE
+   SUCHE
 ========================= */
 
-#searchBox{
-    position:absolute;
-    top:10px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:1000;
-    width:300px;
+#searchBox {
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+  width:300px;
 }
 
-#searchInput{
-    width:100%;
-    padding:8px;
-    font-size:14px;
+
+#searchInput {
+  width:100%;
+  padding:8px;
+  font-size:14px;
 }
 
-#suggestions{
-    background:white;
-    max-height:200px;
-    overflow-y:auto;
-    border:1px solid #ccc;
+
+#suggestions {
+  background:white;
+  max-height:200px;
+  overflow-y:auto;
+  border:1px solid #ccc;
 }
 
-.suggestion-item{
-    padding:6px;
-    cursor:pointer;
+
+.suggestion-item {
+  padding:6px;
+  cursor:pointer;
 }
 
-.suggestion-item:hover{
-    background:#eee;
+
+.suggestion-item:hover {
+  background:#eee;
 }
 
-#infoBox{
-    margin-top:5px;
-    background:rgba(0,0,0,0.7);
-    color:white;
-    padding:6px 10px;
-    font-size:13px;
+
+#infoBox {
+  margin-top:5px;
+  background:rgba(0,0,0,0.7);
+  color:white;
+  padding:6px 10px;
+  font-size:13px;
 }
+
 
 /* =========================
-           TOOLS
+   TOOLS
 ========================= */
 
-#toolBox{
-    position:absolute;
-    top:10px;
-    right:10px;
-    z-index:1000;
-    background:rgba(0,0,0,0.8);
-    padding:6px;
-    border-radius:6px;
+#toolBox {
+
+  position:absolute;
+  top:10px;
+  right:10px;
+  z-index:1000;
+
+  background:rgba(0,0,0,0.8);
+  padding:6px;
+  border-radius:6px;
+
 }
 
-#toolBox button{
-    display:block;
-    width:140px;
-    margin:4px 0;
-    padding:6px;
-    cursor:pointer;
-    border:none;
-    color:white;
-    background:#444;
+
+#toolBox button {
+
+  display:block;
+  width:140px;
+  margin:4px 0;
+  padding:6px;
+
+  cursor:pointer;
+  border:none;
+
+  color:white;
+  background:#444;
+
 }
 
-#toolBox button.active{
-    background:#4da3ff;
-    color:black;
-    font-weight:bold;
+
+#toolBox button.active {
+
+  background:#4da3ff;
+  color:black;
+  font-weight:bold;
+
 }
+
 
 /* =========================
-          MESSUNG
+   MESSUNG
 ========================= */
 
-#measureBox{
-    position:absolute;
-    top:120px;
-    left:50%;
-    transform:translateX(-50%);
-    z-index:1000;
-    background:rgba(0,0,0,0.85);
-    color:white;
-    padding:8px;
-    font-size:14px;
-    display:none;
+#measureBox {
+
+  position:absolute;
+  top:120px;
+  left:50%;
+  transform:translateX(-50%);
+
+  z-index:1000;
+
+  background:rgba(0,0,0,0.85);
+  color:white;
+
+  padding:8px;
+
+  font-size:14px;
+
+  display:none;
+
 }
+
+
+
 </style>
+
 </head>
+
 
 <body>
 
+
 <div id="searchBox">
+
 <input id="searchInput" placeholder="Ort suchen..." />
+
 <div id="suggestions"></div>
-<div id="infoBox">Bereit</div>
+
+<div id="infoBox">
+Bereit
 </div>
+
+</div>
+
+
 
 <div id="measureBox"></div>
 
+
+
 <div id="toolBox">
-<button id="modeCoords" class="active">Koordinaten</button>
-<button id="modeMeasure">Messen</button>
+
+<button id="modeCoords" class="active">
+Koordinaten
+</button>
+
+<button id="modeMeasure">
+Messen
+</button>
+
 </div>
+
+
 
 <div id="map"></div>
 
+
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+
+
 <script>
+
 
 // =========================
 // KARTE
 // =========================
 
-var map=L.map('map',{
-    crs:L.CRS.Simple,
-    minZoom:-3,
-    maxZoom:5,
-    zoomSnap:0.25
+
+var map = L.map('map', {
+
+  crs:L.CRS.Simple,
+
+  minZoom:-3,
+
+  maxZoom:5,
+
+  zoomSnap:0.25
+
 });
 
-var imageUrl="https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
 
-var w=11212;
-var h=9716;
 
-var bounds=[[0,0],[h,w]];
+var imageUrl =
+"https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
 
-L.imageOverlay(imageUrl,bounds).addTo(map);
+
+
+var w = 11212;
+
+var h = 9716;
+
+
+var bounds = [
+
+ [0,0],
+
+ [h,w]
+
+];
+
+
+
+L.imageOverlay(imageUrl,bounds)
+.addTo(map);
+
+
 
 map.fitBounds(bounds);
+
 map.setZoom(-2);
+
 map.setMaxBounds(bounds);
+
 
 
 // =========================
 // GLOBALE VARIABLEN
 // =========================
 
-let allMarkers=[];
+
+let allMarkers = [];
+
 let currentMode="coords";
+
+
 let measurePoints=[];
+
 let measureLine=null;
 
-const infoBox=document.getElementById("infoBox");
+
+
+const metersPerMile = 1000/150;
+
+
+
 
 
 // =========================
 // KOORDINATEN
 // =========================
 
+
+const infoBox =
+document.getElementById("infoBox");
+
+
+
 map.on("click",function(e){
 
-    if(currentMode==="coords"){
 
-        let x=Math.round(e.latlng.lng);
-        let y=Math.round(e.latlng.lat);
+if(currentMode==="coords"){
 
-        infoBox.innerHTML="X: "+x+" | Y: "+y;
-    }
+
+let x=Math.round(e.latlng.lng);
+
+let y=Math.round(e.latlng.lat);
+
+
+infoBox.innerHTML =
+"X: "+x+" | Y: "+y;
+
+
+}
+
 
 });
-
-
 // =========================
 // MARKER SYSTEM
 // =========================
 
+
 function createMarkerIcon(icon,size){
 
-    // PNG / SVG URL
 
-    if(icon && icon.startsWith("http")){
-
-        return L.icon({
-            iconUrl:icon,
-            iconSize:[size,size],
-            iconAnchor:[size/2,size],
-            popupAnchor:[0,-size],
-            shadowUrl:null
-        });
-
-    }
+  // PNG / SVG URL
+  if(icon && icon.startsWith("http")){
 
 
-    // Emoji Marker
+    return L.icon({
 
-    let html=`
-    <div style="
-        font-size:${size}px;
-        transform:translate(-50%,-50%);
-        filter:none;
-    ">
-    ${icon || "📍"}
-    </div>`;
+      iconUrl:icon,
 
+      iconSize:[
+        size,
+        size
+      ],
 
-    return L.divIcon({
-        html:html,
-        className:"",
-        iconSize:[size,size],
-        iconAnchor:[size/2,size/2]
+      iconAnchor:[
+        size/2,
+        size
+      ],
+
+      popupAnchor:[
+        0,
+        -size
+      ],
+
+      shadowUrl:null
+
     });
 
+
+  }
+
+
+
+  // Emoji Marker
+
+  let html = 
+  `<div style="
+    font-size:${size}px;
+    transform:translate(-50%,-50%);
+    filter:none;
+  ">${icon || "📍"}</div>`;
+
+
+
+  return L.divIcon({
+
+    html:html,
+
+    className:"",
+
+    iconSize:[
+      size,
+      size
+    ],
+
+    iconAnchor:[
+      size/2,
+      size/2
+    ]
+
+  });
+
+
+
 }
+
+
+
 
 
 // =========================
 // GOOGLE SCRIPT
 // =========================
 
-const sheetURL="https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
+
+const sheetURL = 
+"https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
+
+
+
+
 
 fetch(sheetURL)
+
 .then(res=>res.json())
+
 .then(data=>{
+
 
 data.forEach(row=>{
 
-if(row.Approved!==true)return;
 
-const name=row.Name;
-const x=parseFloat(row.X);
-const y=parseFloat(row.Y);
+if(row.Approved!==true){
 
-if(!name||isNaN(x)||isNaN(y))return;
+return;
 
-const zoomRequired=Number(row["Ab Zoom"])||0;
-const size=Number(row["Markergröße"])||30;
-const icon=row["Icon"]||"📍";
-
-let popup=`<b>${name}</b><br>${row.Beschreibung||""}`;
-
-if(row.Wiki){
-popup+=`<br><br><a href="${row.Wiki}" target="_blank">Wiki öffnen</a>`;
 }
 
-const marker=L.marker([y,x],{
-    icon:createMarkerIcon(icon,size)
-}).bindPopup(popup);
+
+
+const name=row.Name;
+
+const x=parseFloat(row.X);
+
+const y=parseFloat(row.Y);
+
+
+
+if(!name || isNaN(x) || isNaN(y)){
+
+return;
+
+}
+
+
+
+const zoomRequired =
+Number(row["Ab Zoom"]) || 0;
+
+
+
+const size =
+Number(row["Markergröße"]) || 30;
+
+
+
+const icon =
+row["Icon"] || "📍";
+
+
+
+let popup = 
+`<b>${name}</b><br>${row.Beschreibung || ""}`;
+
+
+
+if(row.Wiki){
+
+
+popup += 
+`<br><br>
+<a href="${row.Wiki}" target="_blank">
+Wiki öffnen
+</a>`;
+
+}
+
+
+
+const marker =
+L.marker(
+
+[y,x],
+
+{
+
+icon:createMarkerIcon(icon,size),
+
+}
+
+)
+
+.bindPopup(popup);
+
+
+
 
 allMarkers.push({
-    name:name,
-    marker:marker,
-    zoom:zoomRequired,
-    x:x,
-    y:y
-});
+
+name:name,
+
+marker:marker,
+
+zoom:zoomRequired,
+
+x:x,
+
+y:y
 
 });
+
+
+
+});
+
+
 
 updateMarkerVisibility();
 
+
+
 });
-  // =========================
+
+
+
+
+
+
+
+// =========================
 // ZOOM SICHTBARKEIT
 // =========================
 
+
 function updateMarkerVisibility(){
 
-    let zoom=map.getZoom();
 
-    allMarkers.forEach(m=>{
+let zoom = map.getZoom();
 
-        if(zoom>=m.zoom){
 
-            if(!map.hasLayer(m.marker)){
-                m.marker.addTo(map);
-            }
 
-        }else{
+allMarkers.forEach(m=>{
 
-            if(map.hasLayer(m.marker)){
-                map.removeLayer(m.marker);
-            }
 
-        }
+if(zoom >= m.zoom){
 
-    });
+
+if(!map.hasLayer(m.marker)){
+
+m.marker.addTo(map);
 
 }
 
+
+
+}
+
+else{
+
+
+if(map.hasLayer(m.marker)){
+
+map.removeLayer(m.marker);
+
+}
+
+
+
+}
+
+
+
+});
+
+
+}
+
+
+
+
+
 map.on("zoomend",updateMarkerVisibility);
+
+
+
 
 
 // =========================
 // SUCHE
 // =========================
 
-const searchInput=document.getElementById("searchInput");
-const suggestions=document.getElementById("suggestions");
+
+const searchInput =
+document.getElementById("searchInput");
+
+
+const suggestions =
+document.getElementById("suggestions");
+
+
 
 
 function searchPlaces(value){
 
-    let text=value.toLowerCase();
 
-    return allMarkers.filter(m=>
-        m.name.toLowerCase().includes(text)
-    );
+let text=value.toLowerCase();
+
+
+
+return allMarkers.filter(m=>
+
+m.name.toLowerCase()
+.includes(text)
+
+);
+
+
 
 }
+
 
 
 searchInput.addEventListener("input",function(){
 
-    let value=this.value.trim();
-
-    suggestions.innerHTML="";
-
-    if(!value)return;
 
 
-    let results=searchPlaces(value);
+let value=this.value.trim();
 
 
-    results.slice(0,10).forEach(m=>{
+suggestions.innerHTML="";
 
-        let div=document.createElement("div");
 
-        div.className="suggestion-item";
 
-        div.innerHTML=m.name;
+if(!value){
 
-        div.onclick=function(){
-            goToMarker(m);
-        };
+return;
 
-        suggestions.appendChild(div);
+}
 
-    });
+
+
+let results =
+searchPlaces(value);
+
+
+
+results.slice(0,10)
+.forEach(m=>{
+
+
+let div =
+document.createElement("div");
+
+
+div.className="suggestion-item";
+
+
+div.innerHTML=m.name;
+
+
+
+div.onclick=function(){
+
+
+goToMarker(m);
+
+
+};
+
+
+
+suggestions.appendChild(div);
+
+
 
 });
 
 
-searchInput.addEventListener("keydown",function(e){
-
-    if(e.key==="Enter"){
-
-        let results=searchPlaces(this.value.trim());
-
-        if(results.length>0){
-
-            goToMarker(results[0]);
-
-        }else{
-
-            this.value="nicht vorhanden";
-
-        }
-
-    }
 
 });
+
+
+
+
+
+searchInput.addEventListener("keydown",
+function(e){
+
+
+if(e.key==="Enter"){
+
+
+let results =
+searchPlaces(this.value.trim());
+
+
+
+if(results.length>0){
+
+
+goToMarker(results[0]);
+
+
+}
+
+else{
+
+
+this.value="nicht vorhanden";
+
+
+}
+
+
+}
+
+
+
+});
+
+
+
 
 
 function goToMarker(m){
 
-    map.setView(
-        [m.y,m.x],
-        Math.max(map.getZoom(),m.zoom)
-    );
 
-    m.marker.openPopup();
+map.setView(
+[m.y,m.x],
+Math.max(map.getZoom(),m.zoom)
+);
 
-    searchInput.value=m.name;
 
-    suggestions.innerHTML="";
+m.marker.openPopup();
+
+
+
+searchInput.value=m.name;
+
+
+suggestions.innerHTML="";
+
 
 }
-
 
 // =========================
 // TOOL UMSCHALTUNG
 // =========================
 
-const modeCoords=document.getElementById("modeCoords");
-const modeMeasure=document.getElementById("modeMeasure");
-const measureBox=document.getElementById("measureBox");
+
+const modeCoords =
+document.getElementById("modeCoords");
+
+
+const modeMeasure =
+document.getElementById("modeMeasure");
+
+
+const measureBox =
+document.getElementById("measureBox");
+
 
 
 modeCoords.onclick=function(){
 
-    currentMode="coords";
 
-    modeCoords.classList.add("active");
-    modeMeasure.classList.remove("active");
+currentMode="coords";
 
-    measureBox.style.display="none";
 
-    clearMeasurement();
+modeCoords.classList.add("active");
+
+modeMeasure.classList.remove("active");
+
+
+measureBox.style.display="none";
+
+
+clearMeasurement();
+
+
 
 };
+
 
 
 modeMeasure.onclick=function(){
 
-    currentMode="measure";
 
-    modeMeasure.classList.add("active");
-    modeCoords.classList.remove("active");
+currentMode="measure";
 
-    measureBox.style.display="block";
 
-    measureBox.innerHTML=
-        "Messung aktiv<br>Punkte setzen";
+modeMeasure.classList.add("active");
+
+modeCoords.classList.remove("active");
+
+
+measureBox.style.display="block";
+
+
+measureBox.innerHTML=
+"Messung aktiv<br>Punkte setzen";
+
 
 };
+
+
+
 
 
 // =========================
 // MESSWERKZEUG
 // =========================
 
+
 map.on("click",function(e){
 
-    if(currentMode!=="measure")return;
+
+if(currentMode!=="measure"){
+
+return;
+
+}
 
 
-    measurePoints.push(e.latlng);
+
+measurePoints.push(e.latlng);
 
 
-    if(measureLine){
-        map.removeLayer(measureLine);
-    }
+
+if(measureLine){
+
+map.removeLayer(measureLine);
+
+}
 
 
-    measureLine=L.polyline(
-        measurePoints,
-        {
-            color:"#4da3ff",
-            weight:3
-        }
-    ).addTo(map);
+
+measureLine =
+L.polyline(
+measurePoints,
+{
+
+color:"#4da3ff",
+
+weight:3
+
+}
+
+).addTo(map);
 
 
-    updateMeasurement();
+
+updateMeasurement();
+
+
 
 });
 
 
+
+
+
+
 function updateMeasurement(){
 
-    let total=0;
+
+let total=0;
 
 
-    for(let i=1;i<measurePoints.length;i++){
 
-        let dx=
-            measurePoints[i].lng-
-            measurePoints[i-1].lng;
-
-        let dy=
-            measurePoints[i].lat-
-            measurePoints[i-1].lat;
+for(let i=1;i<measurePoints.length;i++){
 
 
-        let distancePixels=
-            Math.sqrt(dx*dx+dy*dy);
+
+let dx =
+measurePoints[i].lng -
+measurePoints[i-1].lng;
 
 
-        total+=distancePixels;
 
-    }
-
-
-    let miles=total/1000*150;
-
-    let km=miles*1.60934;
+let dy =
+measurePoints[i].lat -
+measurePoints[i-1].lat;
 
 
-    measureBox.innerHTML=
-        "Punkte: "+
-        measurePoints.length+
-        "<br>Strecke: "+
-        miles.toFixed(1)+
-        " Meilen"+
-        "<br>"+
-        km.toFixed(1)+
-        " km"+
-        "<br><br>"+
-        "<button onclick='clearMeasurement()'>Zurücksetzen</button>";
+
+let distancePixels =
+Math.sqrt(
+dx*dx + dy*dy
+);
+
+
+
+total += distancePixels;
+
 
 }
+
+
+
+let miles =
+total / 1000 * 150;
+
+
+
+let km =
+miles * 1.60934;
+
+
+
+measureBox.innerHTML =
+
+"Punkte: "
++measurePoints.length+
+
+"<br>Strecke: "
++miles.toFixed(1)
++" Meilen"
+
++"<br>"
++km.toFixed(1)
++" km"
+
++"<br><br>"
++
+"<button onclick='clearMeasurement()'>Zurücksetzen</button>";
+
+
+
+}
+
+
 
 
 
 function clearMeasurement(){
 
-    measurePoints=[];
 
 
-    if(measureLine){
-
-        map.removeLayer(measureLine);
-
-        measureLine=null;
-
-    }
+measurePoints=[];
 
 
-    if(currentMode==="measure"){
 
-        measureBox.innerHTML=
-            "Messung aktiv<br>Punkte setzen";
+if(measureLine){
 
-    }
+
+map.removeLayer(measureLine);
+
+
+measureLine=null;
+
 
 }
+
+
+
+if(currentMode==="measure"){
+
+
+measureBox.innerHTML=
+"Messung aktiv<br>Punkte setzen";
+
+
+}
+
+
+
+}
+
+
 
 
 // =========================
 // ANFANGSZUSTAND
 // =========================
 
+
 updateMarkerVisibility();
+
 
 
 </script>
 
+
 </body>
+
 </html>
