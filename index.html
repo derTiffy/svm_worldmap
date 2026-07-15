@@ -7,105 +7,22 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
 <style>
+html, body {margin:0;padding:0;height:100%;width:100%;background:#000;}
+#map {height:100vh;width:100%;}
 
-html, body {
-  margin:0;
-  padding:0;
-  height:100%;
-  width:100%;
-  background:#000;
-}
+/* UI bleibt unverändert */
+#searchBox {position:absolute;top:10px;left:50%;transform:translateX(-50%);z-index:1000;width:300px;}
+#searchInput {width:100%;padding:8px;font-size:14px;}
+#suggestions {background:white;max-height:200px;overflow-y:auto;border:1px solid #ccc;}
+.suggestion-item {padding:6px;cursor:pointer;}
+.suggestion-item:hover {background:#eee;}
+#infoBox {margin-top:5px;background:rgba(0,0,0,0.7);color:white;padding:6px 10px;font-size:13px;}
 
-#map {
-  height:100vh;
-  width:100%;
-}
+#toolBox {position:absolute;top:10px;right:10px;z-index:1000;background:rgba(0,0,0,0.8);padding:6px;border-radius:6px;}
+#toolBox button {display:block;width:140px;margin:4px 0;padding:6px;cursor:pointer;border:none;color:white;background:#444;}
+#toolBox button.active {background:#4da3ff;color:black;font-weight:bold;}
 
-/* ========================= SUCHE ========================= */
-
-#searchBox {
-  position:absolute;
-  top:10px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:1000;
-  width:300px;
-}
-
-#searchInput {
-  width:100%;
-  padding:8px;
-  font-size:14px;
-}
-
-#suggestions {
-  background:white;
-  max-height:200px;
-  overflow-y:auto;
-  border:1px solid #ccc;
-}
-
-.suggestion-item {
-  padding:6px;
-  cursor:pointer;
-}
-
-.suggestion-item:hover {
-  background:#eee;
-}
-
-#infoBox {
-  margin-top:5px;
-  background:rgba(0,0,0,0.7);
-  color:white;
-  padding:6px 10px;
-  font-size:13px;
-}
-
-/* ========================= TOOLS ========================= */
-
-#toolBox {
-  position:absolute;
-  top:10px;
-  right:10px;
-  z-index:1000;
-  background:rgba(0,0,0,0.8);
-  padding:6px;
-  border-radius:6px;
-}
-
-#toolBox button {
-  display:block;
-  width:140px;
-  margin:4px 0;
-  padding:6px;
-  cursor:pointer;
-  border:none;
-  color:white;
-  background:#444;
-}
-
-#toolBox button.active {
-  background:#4da3ff;
-  color:black;
-  font-weight:bold;
-}
-
-/* ========================= MESSUNG ========================= */
-
-#measureBox {
-  position:absolute;
-  top:120px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:1000;
-  background:rgba(0,0,0,0.85);
-  color:white;
-  padding:8px;
-  font-size:14px;
-  display:none;
-}
-
+#measureBox {position:absolute;top:120px;left:50%;transform:translateX(-50%);z-index:1000;background:rgba(0,0,0,0.85);color:white;padding:8px;font-size:14px;display:none;}
 </style>
 </head>
 
@@ -139,12 +56,10 @@ var map = L.map('map', {
   zoomSnap:0.25
 });
 
-var imageUrl =
-"https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
+var imageUrl = "https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
 
 var w = 11212;
 var h = 9716;
-
 var bounds = [[0,0],[h,w]];
 
 L.imageOverlay(imageUrl,bounds).addTo(map);
@@ -162,21 +77,22 @@ let measureLine=null;
 
 const infoBox = document.getElementById("infoBox");
 
-// ========================= ICON SYSTEM (ROBUST) =========================
+// ========================= ICON SYSTEM (FIXED) =========================
 
 function resolveIcon(icon){
 
-  if(!icon) return {type:"emoji", value:"📍"};
+  if(!icon || String(icon).trim()===""){
+    return {type:"emoji", value:"📍"};
+  }
 
   let val = String(icon).trim();
 
-  // Google Drive /file/d/
+  // GOOGLE DRIVE
   let match = val.match(/\/d\/([a-zA-Z0-9_-]+)/);
   if(match){
     return {type:"image", value:"https://drive.google.com/uc?export=view&id="+match[1]};
   }
 
-  // Drive fallback
   if(val.includes("drive.google.com")){
     let id = val.match(/[-\w]{25,}/);
     if(id){
@@ -184,17 +100,13 @@ function resolveIcon(icon){
     }
   }
 
-  // normale URL
+  // DIREKTE URL
   if(val.startsWith("http")){
     return {type:"image", value:val};
   }
 
-  // Emoji/Text
-  if(val.length <= 3){
-    return {type:"emoji", value:val};
-  }
-
-  return {type:"emoji", value:"📍"};
+  // EMOJI (jetzt korrekt!)
+  return {type:"emoji", value:val};
 }
 
 function createMarkerIcon(icon,size){
@@ -221,11 +133,11 @@ function createMarkerIcon(icon,size){
 // ========================= KOORDINATEN =========================
 
 map.on("click",function(e){
-  if(currentMode==="coords"){
-    let x=Math.round(e.latlng.lng);
-    let y=Math.round(e.latlng.lat);
-    infoBox.innerHTML="X: "+x+" | Y: "+y;
-  }
+if(currentMode==="coords"){
+let x=Math.round(e.latlng.lng);
+let y=Math.round(e.latlng.lat);
+infoBox.innerHTML="X: "+x+" | Y: "+y;
+}
 });
 
 // ========================= GOOGLE SCRIPT =========================
@@ -253,7 +165,7 @@ const icon=row["Icon"];
 let popup=`<b>${name}</b><br>${row.Beschreibung||""}`;
 
 if(row.Wiki && row.Wiki.trim().startsWith("http")){
-  popup+=`<br><br><a href="${row.Wiki}" target="_blank">Wiki öffnen</a>`;
+popup+=`<br><br><a href="${row.Wiki}" target="_blank">Wiki öffnen</a>`;
 }
 
 const marker=L.marker([y,x],{
@@ -272,7 +184,6 @@ updateMarkerVisibility();
 
 function updateMarkerVisibility(){
 let zoom=map.getZoom();
-
 allMarkers.forEach(m=>{
 if(zoom>=m.zoom){
 if(!map.hasLayer(m.marker)) m.marker.addTo(map);
@@ -348,29 +259,20 @@ measureBox.innerHTML="Messung aktiv<br>Punkte setzen";
 // ========================= MESSUNG =========================
 
 map.on("click",function(e){
-
 if(currentMode!=="measure") return;
-
 measurePoints.push(e.latlng);
-
 if(measureLine) map.removeLayer(measureLine);
-
 measureLine=L.polyline(measurePoints,{color:"#4da3ff",weight:3}).addTo(map);
-
 updateMeasurement();
-
 });
 
 function updateMeasurement(){
-
 let total=0;
-
 for(let i=1;i<measurePoints.length;i++){
 let dx=measurePoints[i].lng-measurePoints[i-1].lng;
 let dy=measurePoints[i].lat-measurePoints[i-1].lat;
 total+=Math.sqrt(dx*dx+dy*dy);
 }
-
 let miles=total/1000*150;
 let km=miles*1.60934;
 
