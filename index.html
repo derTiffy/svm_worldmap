@@ -48,23 +48,20 @@ html, body {
   border:none;
 }
 
-#suggestions {
-  background:white;
-  color:black;
-  max-height:150px;
-  overflow-y:auto;
-}
-
 /* ================= TOOLS ================= */
 
 #toolBox {
   top:10px;
   right:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
 }
 
 #toolBox button {
-  display:block;
-  margin:4px 0;
+  width:140px;
+  text-align:center;
 }
 
 /* ================= MAP SWITCH ================= */
@@ -125,7 +122,6 @@ button:hover {
 
 <div id="searchBox" class="ui-box">
 <input id="searchInput" placeholder="Ort suchen..." />
-<div id="suggestions"></div>
 </div>
 
 <div id="toolBox" class="ui-box">
@@ -179,17 +175,39 @@ function switchMap(key){
 switchMap("player");
 map.fitBounds(bounds);
 
-// ================= ICONS =================
+// ================= ICONS (FIXED) =================
 
 function resolveIcon(icon){
-if(!icon) return "📍";
-let id = icon.match(/[-\w]{25,}/);
-if(id) return "https://drive.google.com/uc?export=view&id="+id[0];
-return icon;
+
+  if(!icon) return "📍";
+
+  icon = String(icon).trim();
+
+  // ✅ FALL 1: normale URL → NICHT anfassen
+  if(icon.startsWith("http")){
+    
+    // Spezialfall Google Drive VIEW Links
+    if(icon.includes("drive.google.com")){
+      let match = icon.match(/\/d\/([-\w]{25,})/);
+      if(match){
+        return "https://drive.google.com/uc?export=view&id=" + match[1];
+      }
+    }
+
+    return icon;
+  }
+
+  // ✅ FALL 2: rohe Google ID
+  if(icon.length > 20){
+    return "https://drive.google.com/uc?export=view&id=" + icon;
+  }
+
+  // ✅ FALL 3: Emoji/Text
+  return icon;
 }
 
 function isImage(icon){
-return icon.startsWith("http");
+  return icon.startsWith("http");
 }
 
 function createMarkerIcon(icon,size){
@@ -243,7 +261,7 @@ zoom:Number(p["Ab Zoom"])||0
 updateMarkers();
 });
 
-// ================= MARKER LOGIK =================
+// ================= MARKER =================
 
 function updateMarkers(){
 let z=map.getZoom();
