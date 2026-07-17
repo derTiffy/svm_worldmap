@@ -22,10 +22,7 @@ html, body {
   width:100%;
 }
 
-/* =========================
-   MAP SWITCHER
-========================= */
-
+/* MAP SWITCHER */
 #mapSwitcher {
   position:absolute;
   bottom:10px;
@@ -52,10 +49,7 @@ html, body {
   font-weight:bold;
 }
 
-/* =========================
-   SUCHE
-========================= */
-
+/* SUCHE */
 #searchBox {
   position:absolute;
   top:10px;
@@ -68,37 +62,23 @@ html, body {
 #searchInput {
   width:100%;
   padding:8px;
-  font-size:14px;
 }
 
 #suggestions {
   background:white;
   max-height:200px;
   overflow-y:auto;
-  border:1px solid #ccc;
 }
 
-.suggestion-item {
-  padding:6px;
-  cursor:pointer;
-}
-
-.suggestion-item:hover {
-  background:#eee;
-}
-
+/* INFO */
 #infoBox {
   margin-top:5px;
   background:rgba(0,0,0,0.7);
   color:white;
-  padding:6px 10px;
-  font-size:13px;
+  padding:6px;
 }
 
-/* =========================
-   TOOLS
-========================= */
-
+/* TOOLS */
 #toolBox {
   position:absolute;
   top:10px;
@@ -106,78 +86,33 @@ html, body {
   z-index:1000;
   background:rgba(0,0,0,0.8);
   padding:6px;
-  border-radius:6px;
 }
 
-#toolBox button {
-  display:block;
-  width:140px;
-  margin:4px 0;
-  padding:6px;
-  cursor:pointer;
-  border:none;
-  color:white;
-  background:#444;
-}
-
-#toolBox button.active {
-  background:#4da3ff;
-  color:black;
-  font-weight:bold;
-}
-
-/* =========================
-   MESSUNG
-========================= */
-
-#measureBox {
-  position:absolute;
-  top:120px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:1000;
-  background:rgba(0,0,0,0.85);
-  color:white;
-  padding:8px;
-  font-size:14px;
-  display:none;
-}
-
-/* =========================
-   LEGENDE
-========================= */
-
+/* LEGENDE */
 .leaflet-control.legend-control {
-  background:none;
-  border:none;
-  box-shadow:none;
   color:white;
-  padding:8px;
   font-family:"Eagle Lake", serif;
-  font-size:28px;
-  line-height:55px;
-  text-shadow:2px 2px 3px black;
+  font-size:22px;
+  line-height:40px;
 }
 
 .legend-item {
   display:flex;
   align-items:center;
-  gap:12px;
-  white-space:nowrap;
+  gap:10px;
 }
 
 .legend-icon {
-  width:65px;
-  height:65px;
+  width:40px;
+  height:40px;
   display:flex;
-  align-items:center;
   justify-content:center;
-  font-size:65px;
+  align-items:center;
 }
 
 .legend-icon img {
-  max-width:65px;
-  max-height:65px;
+  max-width:40px;
+  max-height:40px;
 }
 
 </style>
@@ -191,14 +126,11 @@ html, body {
 <div id="infoBox">Bereit</div>
 </div>
 
-<div id="measureBox"></div>
-
 <div id="toolBox">
 <button id="modeCoords" class="active">Koordinaten</button>
 <button id="modeMeasure">Messen</button>
 </div>
 
-<!-- MAP SWITCHER -->
 <div id="mapSwitcher">
 <button onclick="switchMap('player')" id="btnPlayer" class="active">Mittelerde</button>
 <button onclick="switchMap('gm')" id="btnGM">Mittelerde - Gebiete</button>
@@ -212,7 +144,7 @@ html, body {
 <script>
 
 // =========================
-// MAP URLs
+// MAPS
 // =========================
 
 const MAPS = {
@@ -221,35 +153,27 @@ const MAPS = {
   all: "https://lh3.googleusercontent.com/d/1DLatrrxcqUIF5CCI-BVGVQcg0MrBcseN=s11212?authuser=0"
 };
 
-let currentMapKey = "player";
+let currentOverlay;
 
 // =========================
-// KARTE
+// MAP INIT
 // =========================
 
-var map = L.map('map', {
+const map = L.map('map', {
   crs:L.CRS.Simple,
   minZoom:-3,
-  maxZoom:5,
-  zoomSnap:0.25
+  maxZoom:5
 });
 
-var w = 11212;
-var h = 9716;
-
-var bounds = [[0,0],[h,w]];
-
-let currentOverlay = null;
+const bounds = [[0,0],[9716,11212]];
 
 function switchMap(key){
 
-  currentMapKey = key;
-
   document.querySelectorAll("#mapSwitcher button").forEach(b=>b.classList.remove("active"));
 
-  if(key==="player") document.getElementById("btnPlayer").classList.add("active");
-  if(key==="gm") document.getElementById("btnGM").classList.add("active");
-  if(key==="all") document.getElementById("btnAll").classList.add("active");
+  if(key==="player") btnPlayer.classList.add("active");
+  if(key==="gm") btnGM.classList.add("active");
+  if(key==="all") btnAll.classList.add("active");
 
   if(currentOverlay){
     map.removeLayer(currentOverlay);
@@ -262,134 +186,75 @@ function switchMap(key){
 switchMap("player");
 
 map.fitBounds(bounds);
-map.setZoom(-2);
-map.setMaxBounds(bounds);
-
-// =========================
-// VARIABLEN
-// =========================
-
-let allMarkers=[];
-let currentMode="coords";
-let measurePoints=[];
-let measureLine=null;
-let mapLegend=[];
-
-// =========================
-// KOORDINATEN
-// =========================
-
-const infoBox = document.getElementById("infoBox");
-
-map.on("click",function(e){
-if(currentMode==="coords"){
-let x=Math.round(e.latlng.lng);
-let y=Math.round(e.latlng.lat);
-infoBox.innerHTML = "X: "+x+" | Y: "+y;
-}
-});
 
 // =========================
 // ICON SYSTEM
 // =========================
 
 function resolveIcon(icon){
-if(!icon){return "📍";}
-let value = String(icon).trim();
-if(value===""){return "📍";}
-if(value.includes("drive.google.com")){
-let id = value.match(/[-\w]{25,}/);
-if(id){return "https://drive.google.com/uc?export=view&id="+id[0];}
+if(!icon) return "📍";
+let v = String(icon).trim();
+if(v.includes("drive.google.com")){
+let id = v.match(/[-\w]{25,}/);
+if(id) return "https://drive.google.com/uc?export=view&id="+id[0];
 }
-return value;
+return v;
 }
 
 function isImage(icon){
-return (
-icon.startsWith("http") &&
-(
-icon.includes("googleusercontent") ||
-icon.includes("drive.google") ||
-icon.includes(".png") ||
-icon.includes(".jpg") ||
-icon.includes(".jpeg") ||
-icon.includes(".webp")
-)
-);
+return icon.startsWith("http");
 }
 
 function createMarkerIcon(icon,size){
-
 let resolved = resolveIcon(icon);
 
 if(isImage(resolved)){
 return L.icon({
 iconUrl:resolved,
 iconSize:[size,size],
-iconAnchor:[size/2,size],
-popupAnchor:[0,-size],
-shadowUrl:null
+iconAnchor:[size/2,size]
 });
 }
 
 return L.divIcon({
-html:`<div style="font-size:${size}px;transform:translate(-50%,-50%);">${resolved}</div>`,
-className:"",
-iconSize:[size,size],
-iconAnchor:[size/2,size/2]
+html:`<div style="font-size:${size}px">${resolved}</div>`,
+className:""
 });
 }
 
 // =========================
-// GOOGLE SCRIPT
+// DATA
 // =========================
 
-const sheetURL =
-"https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
+const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
+
+let allMarkers = [];
 
 fetch(sheetURL)
 .then(res=>res.json())
 .then(data=>{
 
-let pois=[];
+const pois = data.pois || [];
+const legend = data.legend || [];
 
-if(Array.isArray(data)){
-pois=data;
-}else{
-pois=data.pois || [];
-mapLegend=data.legend || [];
-}
+createMapLegend(legend);
 
-createMapLegend(mapLegend);
+pois.forEach(p=>{
 
-pois.forEach(row=>{
+const x = parseFloat(p.X);
+const y = parseFloat(p.Y);
 
-const name=row.Name;
-const x=parseFloat(row.X);
-const y=parseFloat(row.Y);
+if(isNaN(x)||isNaN(y)) return;
 
-if(!name || isNaN(x) || isNaN(y)){return;}
+let marker = L.marker([y,x],{
+icon:createMarkerIcon(p.Icon, p["Markergröße"]||30)
+});
 
-const zoomRequired = Number(row["Ab Zoom"]) || 0;
-const size = Number(row["Markergröße"]) || 30;
-const icon = row["Icon"] || "📍";
-
-let popup = `<b>${name}</b><br>${row.Beschreibung || ""}`;
-
-if(row.Wiki && String(row.Wiki).trim()!==""){
-popup += `<br><br><a href="${row.Wiki}" target="_blank">Wiki öffnen</a>`;
-}
-
-let marker = L.marker([y,x], {
-icon:createMarkerIcon(icon,size)
-}).bindPopup(popup);
+marker.bindPopup(`<b>${p.Name}</b><br>${p.Beschreibung||""}`);
 
 allMarkers.push({
-name:name,
 marker:marker,
-zoom:zoomRequired,
-x:x,
-y:y
+zoom:Number(p["Ab Zoom"])||0
 });
 
 });
@@ -399,10 +264,72 @@ updateMarkerVisibility();
 });
 
 // =========================
-// START
+// MARKER VISIBILITY
 // =========================
 
-updateMarkerVisibility();
+function updateMarkerVisibility(){
+
+let z = map.getZoom();
+
+allMarkers.forEach(m=>{
+if(z>=m.zoom){
+if(!map.hasLayer(m.marker)) m.marker.addTo(map);
+}else{
+if(map.hasLayer(m.marker)) map.removeLayer(m.marker);
+}
+});
+
+}
+
+map.on("zoomend", updateMarkerVisibility);
+
+// =========================
+// LEGENDE
+// =========================
+
+function createMapLegend(legendData){
+
+if(!legendData.length) return;
+
+const control = L.control({position:"topright"});
+
+control.onAdd = function(){
+
+const div = L.DomUtil.create("div","legend-control");
+
+legendData.forEach(e=>{
+
+const item = document.createElement("div");
+item.className="legend-item";
+
+const icon = document.createElement("div");
+icon.className="legend-icon";
+
+let r = resolveIcon(e.Icon);
+
+if(isImage(r)){
+icon.innerHTML=`<img src="${r}">`;
+}else{
+icon.innerHTML=r;
+}
+
+const text = document.createElement("div");
+text.innerText=e.Typ;
+
+item.appendChild(icon);
+item.appendChild(text);
+
+div.appendChild(item);
+
+});
+
+return div;
+
+};
+
+control.addTo(map);
+
+}
 
 </script>
 </body>
