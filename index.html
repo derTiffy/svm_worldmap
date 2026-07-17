@@ -39,7 +39,7 @@ html, body {
   top:10px;
   left:50%;
   transform:translateX(-50%);
-  width:300px;
+  width:250px;
 }
 
 #searchInput {
@@ -98,7 +98,7 @@ button:hover {
   padding:10px;
   border-radius:8px;
   color:white;
-  font-size:16px;
+  font-size:20px;
   line-height:24px;
   max-width:250px;
 }
@@ -111,8 +111,8 @@ button:hover {
 }
 
 .legend-icon img {
-  width:26px;
-  height:26px;
+  width:65px;
+  height:65px;
 }
 
 </style>
@@ -121,7 +121,7 @@ button:hover {
 <body>
 
 <div id="searchBox" class="ui-box">
-<input id="searchInput" placeholder="Ort suchen..." />
+<input id="searchInput" placeholder="Suchen..." />
 </div>
 
 <div id="toolBox" class="ui-box">
@@ -131,7 +131,7 @@ button:hover {
 
 <div id="mapSwitcher" class="ui-box">
 <button onclick="switchMap('player')" id="btnPlayer" class="active">Mittelerde</button>
-<button onclick="switchMap('gm')" id="btnGM">Gebiete</button>
+<button onclick="switchMap('gm')" id="btnGm">Gebiete</button>
 <button onclick="switchMap('all')" id="btnAll">Alle</button>
 </div>
 
