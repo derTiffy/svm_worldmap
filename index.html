@@ -13,8 +13,8 @@ html, body {
   margin:0;
   padding:0;
   height:100%;
-  width:100%;
   background:#000;
+  font-family:"Eagle Lake", serif;
 }
 
 #map {
@@ -22,97 +22,100 @@ html, body {
   width:100%;
 }
 
-/* MAP SWITCHER */
-#mapSwitcher {
-  position:absolute;
-  bottom:10px;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:1000;
-  background:rgba(0,0,0,0.8);
-  padding:6px;
-  border-radius:6px;
-}
+/* ================= UI BASIS ================= */
 
-#mapSwitcher button {
-  margin:3px;
-  padding:6px 10px;
-  cursor:pointer;
-  border:none;
-  background:#444;
+.ui-box {
+  position:absolute;
+  z-index:1000;
+  background:rgba(0,0,0,0.75);
+  border-radius:8px;
+  padding:8px;
   color:white;
 }
 
-#mapSwitcher button.active {
-  background:#4da3ff;
-  color:black;
-  font-weight:bold;
-}
+/* ================= SUCHE ================= */
 
-/* SUCHE */
 #searchBox {
-  position:absolute;
   top:10px;
   left:50%;
   transform:translateX(-50%);
-  z-index:1000;
   width:300px;
 }
 
 #searchInput {
   width:100%;
-  padding:8px;
+  padding:6px;
+  border:none;
 }
 
 #suggestions {
   background:white;
-  max-height:200px;
+  color:black;
+  max-height:150px;
   overflow-y:auto;
 }
 
-/* INFO */
-#infoBox {
-  margin-top:5px;
-  background:rgba(0,0,0,0.7);
-  color:white;
-  padding:6px;
-}
+/* ================= TOOLS ================= */
 
-/* TOOLS */
 #toolBox {
-  position:absolute;
   top:10px;
   right:10px;
-  z-index:1000;
-  background:rgba(0,0,0,0.8);
-  padding:6px;
 }
 
-/* LEGENDE */
-.leaflet-control.legend-control {
+#toolBox button {
+  display:block;
+  margin:4px 0;
+}
+
+/* ================= MAP SWITCH ================= */
+
+#mapSwitcher {
+  bottom:10px;
+  left:50%;
+  transform:translateX(-50%);
+}
+
+#mapSwitcher button.active {
+  background:#4da3ff;
+  color:black;
+}
+
+/* ================= BUTTONS ================= */
+
+button {
+  background:#444;
   color:white;
-  font-family:"Eagle Lake", serif;
-  font-size:22px;
-  line-height:40px;
+  border:none;
+  padding:6px 10px;
+  cursor:pointer;
+}
+
+button:hover {
+  background:#666;
+}
+
+/* ================= LEGENDE ================= */
+
+.leaflet-control.legend-control {
+  background:rgba(0,0,0,0.75);
+  padding:10px;
+  border-radius:8px;
+  color:white;
+  font-size:16px;
+  line-height:24px;
+  max-width:250px;
 }
 
 .legend-item {
   display:flex;
   align-items:center;
   gap:10px;
-}
-
-.legend-icon {
-  width:40px;
-  height:40px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
+  margin-bottom:6px;
 }
 
 .legend-icon img {
-  max-width:40px;
-  max-height:40px;
+  width:26px;
+  height:26px;
 }
 
 </style>
@@ -120,21 +123,20 @@ html, body {
 
 <body>
 
-<div id="searchBox">
+<div id="searchBox" class="ui-box">
 <input id="searchInput" placeholder="Ort suchen..." />
 <div id="suggestions"></div>
-<div id="infoBox">Bereit</div>
 </div>
 
-<div id="toolBox">
+<div id="toolBox" class="ui-box">
 <button id="modeCoords" class="active">Koordinaten</button>
 <button id="modeMeasure">Messen</button>
 </div>
 
-<div id="mapSwitcher">
+<div id="mapSwitcher" class="ui-box">
 <button onclick="switchMap('player')" id="btnPlayer" class="active">Mittelerde</button>
-<button onclick="switchMap('gm')" id="btnGM">Mittelerde - Gebiete</button>
-<button onclick="switchMap('all')" id="btnAll">SL-ALL</button>
+<button onclick="switchMap('gm')" id="btnGM">Gebiete</button>
+<button onclick="switchMap('all')" id="btnAll">Alle</button>
 </div>
 
 <div id="map"></div>
@@ -143,26 +145,21 @@ html, body {
 
 <script>
 
-// =========================
-// MAPS
-// =========================
+// ================= MAP =================
 
 const MAPS = {
-  player: "https://lh3.googleusercontent.com/d/1ITaHpJQKrllAPfGZrAFKz87NfOff9f8T=s11212?authuser=0",
-  gm: "https://lh3.googleusercontent.com/d/1qZPySmQRDEiMgt9D0zWB6tbADWrSx2-S=s11212?authuser=0",
-  all: "https://lh3.googleusercontent.com/d/1DLatrrxcqUIF5CCI-BVGVQcg0MrBcseN=s11212?authuser=0"
+  player: "https://lh3.googleusercontent.com/d/1ITaHpJQKrllAPfGZrAFKz87NfOff9f8T=s11212",
+  gm: "https://lh3.googleusercontent.com/d/1qZPySmQRDEiMgt9D0zWB6tbADWrSx2-S=s11212",
+  all: "https://lh3.googleusercontent.com/d/1DLatrrxcqUIF5CCI-BVGVQcg0MrBcseN=s11212"
 };
 
 let currentOverlay;
 
-// =========================
-// MAP INIT
-// =========================
-
 const map = L.map('map', {
   crs:L.CRS.Simple,
   minZoom:-3,
-  maxZoom:5
+  maxZoom:5,
+  zoomControl:true
 });
 
 const bounds = [[0,0],[9716,11212]];
@@ -170,35 +167,25 @@ const bounds = [[0,0],[9716,11212]];
 function switchMap(key){
 
   document.querySelectorAll("#mapSwitcher button").forEach(b=>b.classList.remove("active"));
-
-  if(key==="player") btnPlayer.classList.add("active");
-  if(key==="gm") btnGM.classList.add("active");
-  if(key==="all") btnAll.classList.add("active");
+  document.getElementById("btn"+key.charAt(0).toUpperCase()+key.slice(1)).classList.add("active");
 
   if(currentOverlay){
     map.removeLayer(currentOverlay);
   }
 
   currentOverlay = L.imageOverlay(MAPS[key], bounds).addTo(map);
-
 }
 
 switchMap("player");
-
 map.fitBounds(bounds);
 
-// =========================
-// ICON SYSTEM
-// =========================
+// ================= ICONS =================
 
 function resolveIcon(icon){
 if(!icon) return "📍";
-let v = String(icon).trim();
-if(v.includes("drive.google.com")){
-let id = v.match(/[-\w]{25,}/);
+let id = icon.match(/[-\w]{25,}/);
 if(id) return "https://drive.google.com/uc?export=view&id="+id[0];
-}
-return v;
+return icon;
 }
 
 function isImage(icon){
@@ -206,25 +193,23 @@ return icon.startsWith("http");
 }
 
 function createMarkerIcon(icon,size){
-let resolved = resolveIcon(icon);
+let r = resolveIcon(icon);
 
-if(isImage(resolved)){
+if(isImage(r)){
 return L.icon({
-iconUrl:resolved,
+iconUrl:r,
 iconSize:[size,size],
 iconAnchor:[size/2,size]
 });
 }
 
 return L.divIcon({
-html:`<div style="font-size:${size}px">${resolved}</div>`,
+html:`<div style="font-size:${size}px">${r}</div>`,
 className:""
 });
 }
 
-// =========================
-// DATA
-// =========================
+// ================= DATA =================
 
 const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABwaLsVMEEmuh8ou_-mHJVs33MeXwzgdTC94A0bvNuFXwcKhCQ/exec";
 
@@ -234,20 +219,16 @@ fetch(sheetURL)
 .then(res=>res.json())
 .then(data=>{
 
-const pois = data.pois || [];
-const legend = data.legend || [];
+createLegend(data.legend || []);
 
-createMapLegend(legend);
+(data.pois || []).forEach(p=>{
 
-pois.forEach(p=>{
-
-const x = parseFloat(p.X);
-const y = parseFloat(p.Y);
-
+let x=parseFloat(p.X);
+let y=parseFloat(p.Y);
 if(isNaN(x)||isNaN(y)) return;
 
-let marker = L.marker([y,x],{
-icon:createMarkerIcon(p.Icon, p["Markergröße"]||30)
+let marker=L.marker([y,x],{
+icon:createMarkerIcon(p.Icon,p["Markergröße"]||30)
 });
 
 marker.bindPopup(`<b>${p.Name}</b><br>${p.Beschreibung||""}`);
@@ -259,17 +240,13 @@ zoom:Number(p["Ab Zoom"])||0
 
 });
 
-updateMarkerVisibility();
-
+updateMarkers();
 });
 
-// =========================
-// MARKER VISIBILITY
-// =========================
+// ================= MARKER LOGIK =================
 
-function updateMarkerVisibility(){
-
-let z = map.getZoom();
+function updateMarkers(){
+let z=map.getZoom();
 
 allMarkers.forEach(m=>{
 if(z>=m.zoom){
@@ -278,34 +255,31 @@ if(!map.hasLayer(m.marker)) m.marker.addTo(map);
 if(map.hasLayer(m.marker)) map.removeLayer(m.marker);
 }
 });
-
 }
 
-map.on("zoomend", updateMarkerVisibility);
+map.on("zoomend",updateMarkers);
 
-// =========================
-// LEGENDE
-// =========================
+// ================= LEGENDE =================
 
-function createMapLegend(legendData){
+function createLegend(data){
 
-if(!legendData.length) return;
+if(!data.length) return;
 
-const control = L.control({position:"topright"});
+const control=L.control({position:"bottomleft"});
 
-control.onAdd = function(){
+control.onAdd=function(){
 
-const div = L.DomUtil.create("div","legend-control");
+const div=L.DomUtil.create("div","legend-control");
 
-legendData.forEach(e=>{
+data.forEach(e=>{
 
-const item = document.createElement("div");
-item.className="legend-item";
+const row=document.createElement("div");
+row.className="legend-item";
 
-const icon = document.createElement("div");
+const icon=document.createElement("div");
 icon.className="legend-icon";
 
-let r = resolveIcon(e.Icon);
+let r=resolveIcon(e.Icon);
 
 if(isImage(r)){
 icon.innerHTML=`<img src="${r}">`;
@@ -313,22 +287,19 @@ icon.innerHTML=`<img src="${r}">`;
 icon.innerHTML=r;
 }
 
-const text = document.createElement("div");
+const text=document.createElement("div");
 text.innerText=e.Typ;
 
-item.appendChild(icon);
-item.appendChild(text);
-
-div.appendChild(item);
+row.appendChild(icon);
+row.appendChild(text);
+div.appendChild(row);
 
 });
 
 return div;
-
 };
 
 control.addTo(map);
-
 }
 
 </script>
