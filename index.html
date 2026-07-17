@@ -98,21 +98,21 @@ button:hover {
   padding:10px;
   border-radius:8px;
   color:white;
-  font-size:16px;
-  line-height:24px;
-  max-width:250px;
+  font-size:24px;
+  line-height:34px;
+  max-width:350px;
 }
 
 .legend-item {
   display:flex;
   align-items:center;
-  gap:10px;
-  margin-bottom:6px;
+  gap:15px;
+  margin-bottom:10px;
 }
 
 .legend-icon img {
-  width:26px;
-  height:26px;
+  width:78px;
+  height:78px;
 }
 
 </style>
@@ -160,22 +160,44 @@ const map = L.map('map', {
 
 const bounds = [[0,0],[9716,11212]];
 
+
 function switchMap(key){
 
-  document.querySelectorAll("#mapSwitcher button").forEach(b=>b.classList.remove("active"));
-  document.getElementById("btn"+key.charAt(0).toUpperCase()+key.slice(1)).classList.add("active");
+  const buttonIds = {
+    player:"btnPlayer",
+    gm:"btnGM",
+    all:"btnAll"
+  };
+
+
+  document.querySelectorAll("#mapSwitcher button")
+  .forEach(b=>b.classList.remove("active"));
+
+
+  document.getElementById(buttonIds[key])
+  .classList.add("active");
+
 
   if(currentOverlay){
     map.removeLayer(currentOverlay);
   }
 
-  currentOverlay = L.imageOverlay(MAPS[key], bounds).addTo(map);
+
+  currentOverlay =
+    L.imageOverlay(
+      MAPS[key],
+      bounds
+    ).addTo(map);
+
 }
 
+
 switchMap("player");
+
 map.fitBounds(bounds);
 
-// ================= ICONS (FIXED) =================
+
+// ================= ICONS =================
 
 function resolveIcon(icon){
 
@@ -183,49 +205,85 @@ function resolveIcon(icon){
 
   icon = String(icon).trim();
 
-  // ✅ FALL 1: normale URL → NICHT anfassen
+
   if(icon.startsWith("http")){
-    
-    // Spezialfall Google Drive VIEW Links
+
     if(icon.includes("drive.google.com")){
-      let match = icon.match(/\/d\/([-\w]{25,})/);
+
+      let match =
+        icon.match(/\/d\/([-\w]{25,})/);
+
+
       if(match){
+
         return "https://drive.google.com/uc?export=view&id=" + match[1];
+
       }
+
     }
 
+
     return icon;
+
   }
 
-  // ✅ FALL 2: rohe Google ID
+
   if(icon.length > 20){
+
     return "https://drive.google.com/uc?export=view&id=" + icon;
+
   }
 
-  // ✅ FALL 3: Emoji/Text
+
   return icon;
+
 }
+
 
 function isImage(icon){
+
   return icon.startsWith("http");
+
 }
+
 
 function createMarkerIcon(icon,size){
-let r = resolveIcon(icon);
 
-if(isImage(r)){
-return L.icon({
-iconUrl:r,
-iconSize:[size,size],
-iconAnchor:[size/2,size]
-});
-}
+  let r = resolveIcon(icon);
 
-return L.divIcon({
-html:`<div style="font-size:${size}px">${r}</div>`,
-className:""
-});
+
+  if(isImage(r)){
+
+    return L.icon({
+
+      iconUrl:r,
+
+      iconSize:[
+        size,
+        size
+      ],
+
+      iconAnchor:[
+        size/2,
+        size
+      ]
+
+    });
+
+  }
+
+
+  return L.divIcon({
+
+    html:
+    `<div style="font-size:${size}px">${r}</div>`,
+
+    className:""
+
+  });
+
 }
+<script>
 
 // ================= DATA =================
 
@@ -233,93 +291,234 @@ const sheetURL = "https://script.google.com/macros/s/AKfycbwGaaBeERsd4o-nj-aCABw
 
 let allMarkers = [];
 
+
 fetch(sheetURL)
+
 .then(res=>res.json())
+
 .then(data=>{
+
 
 createLegend(data.legend || []);
 
+
+
 (data.pois || []).forEach(p=>{
 
+
 let x=parseFloat(p.X);
+
 let y=parseFloat(p.Y);
+
+
 if(isNaN(x)||isNaN(y)) return;
 
-let marker=L.marker([y,x],{
-icon:createMarkerIcon(p.Icon,p["Markergröße"]||30)
-});
 
-marker.bindPopup(`<b>${p.Name}</b><br>${p.Beschreibung||""}`);
+
+let marker = L.marker(
+  [y,x],
+  {
+    icon:createMarkerIcon(
+      p.Icon,
+      p["Markergröße"] || 30
+    )
+  }
+);
+
+
+
+marker.bindPopup(
+`
+<b>${p.Name}</b>
+<br>
+${p.Beschreibung||""}
+`
+);
+
+
 
 allMarkers.push({
-marker:marker,
-zoom:Number(p["Ab Zoom"])||0
-});
+
+  marker:marker,
+
+  zoom:Number(p["Ab Zoom"])||0
 
 });
+
+
+});
+
+
 
 updateMarkers();
+
+
 });
+
+
 
 // ================= MARKER =================
 
+
 function updateMarkers(){
-let z=map.getZoom();
+
+let z = map.getZoom();
+
 
 allMarkers.forEach(m=>{
-if(z>=m.zoom){
-if(!map.hasLayer(m.marker)) m.marker.addTo(map);
-}else{
-if(map.hasLayer(m.marker)) map.removeLayer(m.marker);
-}
-});
+
+
+if(z >= m.zoom){
+
+
+if(!map.hasLayer(m.marker)){
+
+m.marker.addTo(map);
+
 }
 
-map.on("zoomend",updateMarkers);
+
+}
+else{
+
+
+if(map.hasLayer(m.marker)){
+
+map.removeLayer(m.marker);
+
+}
+
+
+}
+
+
+});
+
+
+}
+
+
+
+map.on(
+"zoomend",
+updateMarkers
+);
+
+
+
 
 // ================= LEGENDE =================
 
+
 function createLegend(data){
+
 
 if(!data.length) return;
 
-const control=L.control({position:"bottomleft"});
+
+
+const control =
+L.control({
+position:"bottomleft"
+});
+
+
 
 control.onAdd=function(){
 
-const div=L.DomUtil.create("div","legend-control");
+
+const div =
+L.DomUtil.create(
+"div",
+"legend-control"
+);
+
+
 
 data.forEach(e=>{
 
-const row=document.createElement("div");
-row.className="legend-item";
 
-const icon=document.createElement("div");
-icon.className="legend-icon";
+const row =
+document.createElement("div");
 
-let r=resolveIcon(e.Icon);
+
+row.className =
+"legend-item";
+
+
+
+const icon =
+document.createElement("div");
+
+
+icon.className =
+"legend-icon";
+
+
+
+let r =
+resolveIcon(e.Icon);
+
+
 
 if(isImage(r)){
-icon.innerHTML=`<img src="${r}">`;
-}else{
-icon.innerHTML=r;
+
+
+icon.innerHTML =
+`
+<img src="${r}">
+`;
+
+
+}
+else{
+
+
+icon.innerHTML =
+r;
+
+
 }
 
-const text=document.createElement("div");
-text.innerText=e.Typ;
+
+
+const text =
+document.createElement("div");
+
+
+text.innerText =
+e.Typ;
+
+
 
 row.appendChild(icon);
+
 row.appendChild(text);
+
+
 div.appendChild(row);
+
+
 
 });
 
+
+
 return div;
+
+
 };
 
+
+
 control.addTo(map);
+
+
+
 }
 
+
 </script>
+
 </body>
 </html>
