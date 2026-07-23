@@ -9,7 +9,7 @@
 
 <style>
 
-html, body {
+html,body{
   margin:0;
   padding:0;
   height:100%;
@@ -17,194 +17,233 @@ html, body {
   background:#000;
 }
 
-#map {
+#map{
   height:100vh;
   width:100%;
 }
 
+/* =========================
+   EINHEITLICHER TOOLBOX STIL
+========================= */
+
+.toolbox-style{
+  background:rgba(0,0,0,.82);
+  border-radius:6px;
+  box-shadow:0 0 8px rgba(0,0,0,.4);
+}
 
 /* =========================
    SUCHE
 ========================= */
 
-#searchBox {
+#searchBox{
   position:absolute;
   top:10px;
   left:50%;
   transform:translateX(-50%);
   z-index:1000;
-  width:300px;
+  width:320px;
 }
 
-
-#searchInput {
+#searchInput{
   width:100%;
   padding:8px;
   font-size:14px;
+  box-sizing:border-box;
+  border:none;
 }
 
-
-#suggestions {
+#suggestions{
   background:white;
   max-height:200px;
   overflow-y:auto;
   border:1px solid #ccc;
 }
 
-
-.suggestion-item {
+.suggestion-item{
   padding:6px;
   cursor:pointer;
 }
 
-
-.suggestion-item:hover {
+.suggestion-item:hover{
   background:#eee;
 }
 
-
-#infoBox {
+#infoBox{
   margin-top:5px;
-  background:rgba(0,0,0,0.7);
   color:white;
-  padding:6px 10px;
+  padding:8px 10px;
   font-size:13px;
 }
 
-
 /* =========================
-   TOOLS
+   TOOLS RECHTS OBEN
 ========================= */
 
-#toolBox {
-
+#toolBox{
   position:absolute;
   top:10px;
   right:10px;
   z-index:1000;
-
-  background:rgba(0,0,0,0.8);
   padding:6px;
-  border-radius:6px;
-
 }
 
-
-#toolBox button {
-
+#toolBox button{
   display:block;
   width:140px;
   margin:4px 0;
   padding:6px;
-
   cursor:pointer;
   border:none;
-
   color:white;
   background:#444;
-
 }
 
-
-#toolBox button.active {
-
+#toolBox button.active{
   background:#4da3ff;
   color:black;
   font-weight:bold;
-
 }
 
+/* =========================
+   MAP AUSWAHL
+========================= */
 
+#mapSelector{
+  position:absolute;
+  right:10px;
+  bottom:20px;
+  z-index:1000;
+  padding:6px;
+}
+
+#mapSelector button{
+  display:block;
+  width:140px;
+  margin:4px 0;
+  padding:6px;
+  cursor:pointer;
+  border:none;
+  color:white;
+  background:#444;
+}
+
+#mapSelector button.active{
+  background:#4da3ff;
+  color:black;
+  font-weight:bold;
+}
 
 /* =========================
    MESSUNG
 ========================= */
 
-#measureBox {
-
+#measureBox{
   position:absolute;
   top:120px;
   left:50%;
   transform:translateX(-50%);
-
   z-index:1000;
-
-  background:rgba(0,0,0,0.85);
   color:white;
-
   padding:8px;
-
   font-size:14px;
-
   display:none;
-
 }
 
+#measureBox button{
+  background:#4da3ff;
+  border:none;
+  padding:5px 10px;
+  cursor:pointer;
+}
 
+/* =========================
+   PASSWORT DIALOG
+========================= */
+
+#passwordOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.55);
+  z-index:3000;
+}
+
+#passwordDialog{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:300px;
+  padding:15px;
+  color:white;
+}
+
+#passwordDialog h3{
+  margin:0 0 10px 0;
+  font-size:16px;
+}
+
+#passwordDialog input{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px;
+  margin-bottom:10px;
+}
+
+#passwordDialog button{
+  width:100px;
+  padding:6px;
+  margin-right:5px;
+  border:none;
+  cursor:pointer;
+}
+
+.password-ok{
+  background:#4da3ff;
+}
+
+.password-cancel{
+  background:#444;
+  color:white;
+}
 
 /* =========================
    LEGENDE
 ========================= */
 
-.leaflet-control.legend-control {
-
+.leaflet-control.legend-control{
   background:none;
   border:none;
   box-shadow:none;
-
   color:white;
-
   padding:8px;
-
-  font-family:"Eagle Lake", serif;
-
+  font-family:"Eagle Lake",serif;
   font-size:28px;
-
   line-height:55px;
-
   text-shadow:2px 2px 3px black;
-
 }
 
-
-.legend-item {
-
+.legend-item{
   display:flex;
-
   align-items:center;
-
   gap:12px;
-
   white-space:nowrap;
-
 }
 
-
-.legend-icon {
-
+.legend-icon{
   width:65px;
-
   height:65px;
-
   display:flex;
-
   align-items:center;
-
   justify-content:center;
-
   font-size:65px;
-
 }
 
-
-.legend-icon img {
-
+.legend-icon img{
   max-width:65px;
-
   max-height:65px;
-
 }
-
 
 </style>
 
@@ -217,35 +256,73 @@ html, body {
 
 <div id="searchBox">
 
-<input id="searchInput" placeholder="Ort suchen..." />
+  <input id="searchInput" placeholder="Ort suchen..." />
 
-<div id="suggestions"></div>
+  <div id="suggestions"></div>
 
-<div id="infoBox">
-Bereit
-</div>
-
-</div>
-
-
-
-<div id="measureBox"></div>
-
-
-
-<div id="toolBox">
-
-<button id="modeCoords" class="active">
-Koordinaten
-</button>
-
-<button id="modeMeasure">
-Messen
-</button>
+  <div id="infoBox" class="toolbox-style">
+    Bereit
+  </div>
 
 </div>
 
+<div id="measureBox" class="toolbox-style"></div>
 
+<div id="toolBox" class="toolbox-style">
+
+  <button id="modeCoords" class="active">
+    Koordinaten
+  </button>
+
+  <button id="modeMeasure">
+    Messen
+  </button>
+
+</div>
+
+<div id="mapSelector" class="toolbox-style">
+
+  <button id="mapMiddleearth" class="active">
+    Mittelerde
+  </button>
+
+  <button id="mapTravel">
+    Reisen
+  </button>
+
+  <button id="mapGM">
+    SL
+  </button>
+
+</div>
+
+<div id="passwordOverlay">
+
+  <div id="passwordDialog" class="toolbox-style">
+
+    <h3>Spielleiterkarte</h3>
+
+    <input
+      id="slPassword"
+      type="password"
+      placeholder="Passwort eingeben"
+    >
+
+    <button
+      id="slOpen"
+      class="password-ok">
+      Öffnen
+    </button>
+
+    <button
+      id="slCancel"
+      class="password-cancel">
+      Abbrechen
+    </button>
+
+  </div>
+
+</div>
 
 <div id="map"></div>
 
@@ -276,28 +353,32 @@ var map = L.map('map', {
 
 
 
-var imageUrl =
-"https://lh3.googleusercontent.com/d/1RIf4qzz4r2HtjfR_boJsVkiQY4olmhAK=s11212?authuser=0";
+const MAPS = {
 
+  middleearth:
+  "https://lh3.googleusercontent.com/d/1ITaHpJQKrllAPfGZrAFKz87NfOff9f8T=s11212?authuser=0",
 
+  travel:
+  "https://lh3.googleusercontent.com/d/1qZPySmQRDEiMgt9D0zWB6tbADWrSx2-S=s11212?authuser=0",
+
+  gm:
+  "https://lh3.googleusercontent.com/d/1DLatrrxcqUIF5CCI-BVGVQcg0MrBcseN=s11212?authuser=0"
+
+};
 
 var w = 11212;
 var h = 9716;
 
-
-
 var bounds = [
-
  [0,0],
-
  [h,w]
-
 ];
 
-
-
-L.imageOverlay(imageUrl,bounds)
-.addTo(map);
+let currentOverlay =
+L.imageOverlay(
+  MAPS.middleearth,
+  bounds
+).addTo(map);
 
 
 
@@ -325,6 +406,7 @@ let measurePoints=[];
 let measureLine=null;
 
 let mapLegend=[];
+let activeMap="middleearth";
 
 
 
@@ -573,6 +655,70 @@ size/2
 
 }
 
+// =========================
+// KARTENWECHSEL
+// =========================
+
+function switchMap(mapType){
+
+  if(activeMap===mapType){
+    return;
+  }
+
+  activeMap=mapType;
+
+  map.removeLayer(currentOverlay);
+
+  currentOverlay =
+  L.imageOverlay(
+    MAPS[mapType],
+    bounds
+  ).addTo(map);
+
+  updateMapButtons();
+
+}
+
+
+function updateMapButtons(){
+
+  document
+  .getElementById("mapMiddleearth")
+  .classList.remove("active");
+
+  document
+  .getElementById("mapTravel")
+  .classList.remove("active");
+
+  document
+  .getElementById("mapGM")
+  .classList.remove("active");
+
+  if(activeMap==="middleearth"){
+
+    document
+    .getElementById("mapMiddleearth")
+    .classList.add("active");
+
+  }
+
+  if(activeMap==="travel"){
+
+    document
+    .getElementById("mapTravel")
+    .classList.add("active");
+
+  }
+
+  if(activeMap==="gm"){
+
+    document
+    .getElementById("mapGM")
+    .classList.add("active");
+
+  }
+
+}
 
 
 
@@ -1406,7 +1552,95 @@ measureBox.innerHTML =
 }
 
 
+// =========================
+// PASSWORT DIALOG
+// =========================
 
+const passwordOverlay =
+document.getElementById(
+  "passwordOverlay"
+);
+
+const slPassword =
+document.getElementById(
+  "slPassword"
+);
+
+document
+.getElementById("mapMiddleearth")
+.onclick=function(){
+
+  switchMap("middleearth");
+
+};
+
+document
+.getElementById("mapTravel")
+.onclick=function(){
+
+  switchMap("travel");
+
+};
+
+document
+.getElementById("mapGM")
+.onclick=function(){
+
+  slPassword.value="";
+
+  passwordOverlay.style.display=
+  "block";
+
+};
+
+document
+.getElementById("slCancel")
+.onclick=function(){
+
+  passwordOverlay.style.display=
+  "none";
+
+};
+
+document
+.getElementById("slOpen")
+.onclick=function(){
+
+  if(
+    slPassword.value==="SvM_SL"
+  ){
+
+    switchMap("gm");
+
+    passwordOverlay.style.display=
+    "none";
+
+  }
+
+  else{
+
+    alert(
+      "Falsches Passwort"
+    );
+
+  }
+
+};
+
+slPassword.addEventListener(
+  "keydown",
+  function(e){
+
+    if(e.key==="Enter"){
+
+      document
+      .getElementById("slOpen")
+      .click();
+
+    }
+
+  }
+);
 
 
 // =========================
@@ -1415,6 +1649,7 @@ measureBox.innerHTML =
 
 
 updateMarkerVisibility();
+updateMapButtons();
 
 
 
