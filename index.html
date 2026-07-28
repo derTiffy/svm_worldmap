@@ -813,7 +813,19 @@ row["Icon"] || "📍";
 
 
 let popup =
-`<b>${name}</b><br>${row.Beschreibung || ""}`;
+`
+<b>${name}</b>
+
+<div style="
+max-height:100px;
+overflow-y:auto;
+margin-top:4px;
+">
+
+${row.Beschreibung || ""}
+
+</div>
+`;
 
 
 
