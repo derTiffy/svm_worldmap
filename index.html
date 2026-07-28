@@ -1382,20 +1382,25 @@ this.value =
 function goToMarker(m){
 
   let targetZoom =
-  m.zoom + 1;
-
-  targetZoom =
   Math.min(
-    targetZoom,
+    m.zoom + 1,
     map.getMaxZoom()
   );
 
-  map.setView(
+  map.flyTo(
     [m.y,m.x],
-    targetZoom
+    targetZoom,
+    {
+      animate:true,
+      duration:0.5
+    }
   );
 
-  m.marker.openPopup();
+  setTimeout(function(){
+
+    m.marker.openPopup();
+
+  },600);
 
   searchInput.value =
   m.name;
