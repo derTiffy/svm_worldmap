@@ -110,8 +110,9 @@ html,body{
   font-family:"Aniron",serif;
 }
 
-.suggestion-item:hover{
-  background:#eee;
+.suggestion-item.selected{
+  background:#4da3ff;
+  color:black;
 }
 
 #infoBox{
@@ -1234,7 +1235,7 @@ document.getElementById("searchInput");
 
 const suggestions =
 document.getElementById("suggestions");
-
+let selectedSuggestion = -1;
 
 
 
@@ -1260,7 +1261,26 @@ m.name.toLowerCase()
 
 }
 
+function updateSuggestionSelection(){
 
+  const items =
+  suggestions.querySelectorAll(
+    ".suggestion-item"
+  );
+
+  items.forEach(item =>
+    item.classList.remove("selected")
+  );
+
+  if(
+    selectedSuggestion >= 0 &&
+    selectedSuggestion < items.length
+  ){
+    items[selectedSuggestion]
+    .classList.add("selected");
+  }
+
+}
 
 
 searchInput.addEventListener(
@@ -1275,7 +1295,7 @@ this.value.trim();
 
 
 suggestions.innerHTML="";
-
+selectedSuggestion = -1;
 
 
 if(!value){
@@ -1339,40 +1359,87 @@ searchInput.addEventListener(
 "keydown",
 function(e){
 
+  let results =
+  searchPlaces(
+    this.value.trim()
+  );
 
-if(e.key==="Enter"){
+  if(e.key==="ArrowDown"){
 
+    e.preventDefault();
 
+    if(results.length > 0){
 
-let results =
-searchPlaces(this.value.trim());
+      selectedSuggestion++;
 
+      if(
+        selectedSuggestion >=
+        results.length
+      ){
+        selectedSuggestion = 0;
+      }
 
+      updateSuggestionSelection();
 
-if(results.length>0){
+    }
 
+    return;
 
-goToMarker(results[0]);
+  }
 
+  if(e.key==="ArrowUp"){
 
-}
+    e.preventDefault();
 
-else{
+    if(results.length > 0){
 
+      selectedSuggestion--;
 
-this.value =
-"nicht vorhanden";
+      if(
+        selectedSuggestion < 0
+      ){
+        selectedSuggestion =
+        results.length - 1;
+      }
 
+      updateSuggestionSelection();
 
-}
+    }
 
+    return;
 
-}
+  }
 
+  if(e.key==="Enter"){
 
+    if(
+      selectedSuggestion >= 0 &&
+      results[selectedSuggestion]
+    ){
+
+      goToMarker(
+        results[selectedSuggestion]
+      );
+
+      return;
+
+    }
+
+    if(results.length > 0){
+
+      goToMarker(results[0]);
+
+    }
+    else{
+
+      this.value =
+      "nicht vorhanden";
+
+    }
+
+  }
 
 });
-
 
 
 
