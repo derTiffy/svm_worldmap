@@ -417,7 +417,9 @@ var map = L.map('map', {
 
   zoomSnap:0.5,
 
-  zoomDelta:0.5
+  zoomDelta:0.5,
+
+  wheelPxPerZoomLevel:120
 
 });
 
@@ -1379,31 +1381,26 @@ this.value =
 
 function goToMarker(m){
 
+  let targetZoom =
+  m.zoom + 1;
 
-map.setView(
+  targetZoom =
+  Math.min(
+    targetZoom,
+    map.getMaxZoom()
+  );
 
-[m.y,m.x],
+  map.setView(
+    [m.y,m.x],
+    targetZoom
+  );
 
-Math.max(
-map.getZoom(),
-m.zoom
-)
+  m.marker.openPopup();
 
-);
+  searchInput.value =
+  m.name;
 
-
-
-m.marker.openPopup();
-
-
-
-searchInput.value =
-m.name;
-
-
-
-suggestions.innerHTML="";
-
+  suggestions.innerHTML="";
 
 }
 
