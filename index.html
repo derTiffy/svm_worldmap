@@ -201,19 +201,26 @@ html,body{
   padding:5px 10px;
   cursor:pointer;
 }
-#zoomInfo{
-  position:absolute;
-  top:120px;
-  right:10px;
-  z-index:1000;
+.zoom-info-control{
+
+  background:rgba(0,0,0,.82);
 
   color:white;
 
-  padding:8px;
+  font-family:"Aniron",serif;
 
   font-size:14px;
 
-  font-family:"Aniron",serif;
+  text-align:center;
+
+  padding:6px 10px;
+
+  min-width:80px;
+
+  border-radius:0 6px 6px 0;
+
+  line-height:18px;
+
 }
 
 /* =========================
@@ -327,9 +334,7 @@ html,body{
 
 <div id="measureBox" class="toolbox-style"></div>
 
-<div id="zoomInfo" class="toolbox-style">
-  Zoom: 0
-</div>
+
    
 <div id="toolBox" class="toolbox-style">
 
@@ -503,8 +508,6 @@ let activeMap="middleearth";
 const infoBox =
 document.getElementById("infoBox");
 
-const zoomInfo =
-document.getElementById("zoomInfo");
 
 map.on("click",function(e){
 
@@ -1810,6 +1813,60 @@ function updateZoomInfo(){
   zoomInfo.innerHTML =
   "Zoom: " +
   z.toFixed(2);
+
+}
+   // =========================
+// ZOOM ANZEIGE
+// =========================
+
+let zoomInfoControl;
+
+const ZoomInfoControl =
+L.Control.extend({
+
+  options:{
+    position:"topleft"
+  },
+
+  onAdd:function(){
+
+    const div =
+    L.DomUtil.create(
+      "div",
+      "zoom-info-control"
+    );
+
+    zoomInfoControl = div;
+
+    div.innerHTML =
+    "Zoom<br>-2.0";
+
+    return div;
+
+  }
+
+});
+
+map.addControl(
+  new ZoomInfoControl()
+);
+
+function updateZoomInfo(){
+
+  let z =
+  map.getZoom();
+
+  if(!zoomInfoControl){
+    return;
+  }
+
+  zoomInfoControl.innerHTML =
+  "Zoom<br>" +
+  (
+    z > 0
+    ? "+" + z.toFixed(1)
+    : z.toFixed(1)
+  );
 
 }
 
