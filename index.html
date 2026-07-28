@@ -326,11 +326,7 @@ html,body{
 </div>
 
 <div id="measureBox" class="toolbox-style"></div>
-
-<div id="zoomInfo" class="toolbox-style">
-  Zoom: 0
-</div>
-   
+ 
 <div id="toolBox" class="toolbox-style">
 
   <button id="modeCoords" class="active">
@@ -395,6 +391,28 @@ html,body{
 
 
 <script>
+
+.zoom-display{
+
+  background:rgba(0,0,0,.82);
+
+  color:white;
+
+  font-family:"Aniron",serif;
+
+  font-size:14px;
+
+  min-width:80px;
+
+  text-align:center;
+
+  padding:6px 10px;
+
+  border-radius:0 6px 6px 0;
+
+  line-height:18px;
+
+}
 
 
 // =========================
@@ -503,8 +521,7 @@ let activeMap="middleearth";
 const infoBox =
 document.getElementById("infoBox");
 
-const zoomInfo =
-document.getElementById("zoomInfo");
+
 
 map.on("click",function(e){
 
@@ -1813,6 +1830,58 @@ function updateZoomInfo(){
 
 }
 
+// =========================
+// ZOOM ANZEIGE
+// =========================
+
+let zoomControlDisplay;
+
+const ZoomDisplay =
+L.Control.extend({
+
+  options:{
+    position:"topleft"
+  },
+
+  onAdd:function(){
+
+    const div =
+    L.DomUtil.create(
+      "div",
+      "zoom-display"
+    );
+
+    div.innerHTML =
+    "Zoom<br>0";
+
+    zoomControlDisplay =
+    div;
+
+    return div;
+
+  }
+
+});
+
+map.addControl(
+  new ZoomDisplay()
+);
+
+function updateZoomInfo(){
+
+  const z =
+  map.getZoom();
+
+  if(!zoomControlDisplay){
+    return;
+  }
+
+  zoomControlDisplay.innerHTML =
+    "Zoom<br>" +
+    z.toFixed(1);
+
+}
+   
 // =========================
 // START
 // =========================
