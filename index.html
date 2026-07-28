@@ -46,13 +46,12 @@
 
 #searchInput,
 
-.leaflet-control.legend-control,
-
-.leaflet-popup-content{
+.leaflet-control.legend-control{
 
   font-family:"Aniron", serif;
 
 }
+
   
 html,body{
   margin:0;
@@ -108,6 +107,7 @@ html,body{
 .suggestion-item{
   padding:6px;
   cursor:pointer;
+  font-family:"Aniron",serif;
 }
 
 .suggestion-item:hover{
@@ -263,7 +263,7 @@ html,body{
   box-shadow:none;
   color:white;
   padding:8px;
-  font-family:"Eagle Lake",serif;
+  font-family:"Aniron",serif;
   font-size:28px;
   line-height:55px;
   text-shadow:2px 2px 3px black;
@@ -859,18 +859,21 @@ row["Icon"] || "📍";
 
 let popup =
 `
-<b style="font-weight:bold;">
+<div style="
+font-family:'Aniron',serif;
+font-weight:bold;
+margin-bottom:6px;
+">
 ${name}
-</b>
+</div>
 
 <div style="
 max-height:100px;
 overflow-y:auto;
 margin-top:4px;
+font-family:sans-serif;
 ">
-
 ${row.Beschreibung || ""}
-
 </div>
 `;
 
