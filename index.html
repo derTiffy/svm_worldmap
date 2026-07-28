@@ -959,17 +959,15 @@ icon:createMarkerIcon(icon,size)
 
 marker.on("click",function(){
 
-  infoBox.innerHTML =
-  name +
-  " | X: " +
-  Math.round(x) +
-  " | Y: " +
-  Math.round(y);
+  goToMarker({
+    name:name,
+    marker:marker,
+    zoom:zoomRequired,
+    x:x,
+    y:y
+  });
 
 });
-
-
-
 
 
 allMarkers.push({
@@ -1448,6 +1446,13 @@ function(e){
 
 function goToMarker(m){
 
+  infoBox.innerHTML =
+  m.name +
+  " | X: " +
+  Math.round(m.x) +
+  " | Y: " +
+  Math.round(m.y);
+
   let targetZoom =
   Math.min(
     m.zoom + 1,
@@ -1463,11 +1468,14 @@ function goToMarker(m){
     }
   );
 
-  setTimeout(function(){
+  map.once(
+    "moveend",
+    function(){
 
-    m.marker.openPopup();
+      m.marker.openPopup();
 
-  },1900);
+    }
+  );
 
   searchInput.value =
   m.name;
@@ -1475,10 +1483,6 @@ function goToMarker(m){
   suggestions.innerHTML="";
 
 }
-
-
-
-
 
 // =========================
 // TOOL UMSCHALTUNG
