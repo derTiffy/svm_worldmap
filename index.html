@@ -286,7 +286,7 @@ html,body{
 }
 
 .legend-icon img{
-  max-width:49;
+  max-width:49px;
   max-height:49px;
 }
 
@@ -432,8 +432,86 @@ map.fitBounds(bounds);
 map.setZoom(-2);
 
 map.setMaxBounds(bounds);
+map.options.maxBoundsViscosity = 1.0;
+// =========================
+// NO BLACK BORDER
+// =========================
 
+function keepMapInsideBounds(){
 
+  const currentBounds =
+  map.getBounds();
+
+  const currentZoom =
+  map.getZoom();
+
+  const mapWidth =
+  bounds[1][1] - bounds[0][1];
+
+  const mapHeight =
+  bounds[1][0] - bounds[0][0];
+
+  const visibleWidth =
+  currentBounds.getEast() -
+  currentBounds.getWest();
+
+  const visibleHeight =
+  currentBounds.getNorth() -
+  currentBounds.getSouth();
+
+  let center =
+  map.getCenter();
+
+  let x =
+  center.lng;
+
+  let y =
+  center.lat;
+
+  if(visibleWidth < mapWidth){
+
+    const minX =
+    bounds[0][1] +
+    visibleWidth / 2;
+
+    const maxX =
+    bounds[1][1] -
+    visibleWidth / 2;
+
+    x =
+    Math.min(
+      maxX,
+      Math.max(minX,x)
+    );
+
+  }
+
+  if(visibleHeight < mapHeight){
+
+    const minY =
+    bounds[0][0] +
+    visibleHeight / 2;
+
+    const maxY =
+    bounds[1][0] -
+    visibleHeight / 2;
+
+    y =
+    Math.min(
+      maxY,
+      Math.max(minY,y)
+    );
+
+  }
+
+  map.panTo(
+    [y,x],
+    {
+      animate:false
+    }
+  );
+
+}
 
 
 
@@ -1147,9 +1225,23 @@ map.removeLayer(m.marker);
 
 map.on(
 "zoomend",
-updateMarkerVisibility
+function(){
+
+  updateMarkerVisibility();
+
+  keepMapInsideBounds();
+
+}
+);
+map.on(
+"dragend",
+keepMapInsideBounds
 );
 
+map.on(
+"resize",
+keepMapInsideBounds
+);
 
 
 
@@ -1723,7 +1815,7 @@ slPassword.addEventListener(
 
 updateMarkerVisibility();
 updateMapButtons();
-
+keepMapInsideBounds();
 
 
 </script>
