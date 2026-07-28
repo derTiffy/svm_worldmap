@@ -201,6 +201,20 @@ html,body{
   padding:5px 10px;
   cursor:pointer;
 }
+#zoomInfo{
+  position:absolute;
+  top:120px;
+  right:10px;
+  z-index:1000;
+
+  color:white;
+
+  padding:8px;
+
+  font-size:14px;
+
+  font-family:"Aniron",serif;
+}
 
 /* =========================
    PASSWORT DIALOG
@@ -313,6 +327,10 @@ html,body{
 
 <div id="measureBox" class="toolbox-style"></div>
 
+<div id="zoomInfo" class="toolbox-style">
+  Zoom: 0
+</div>
+   
 <div id="toolBox" class="toolbox-style">
 
   <button id="modeCoords" class="active">
@@ -483,7 +501,8 @@ let activeMap="middleearth";
 const infoBox =
 document.getElementById("infoBox");
 
-
+const zoomInfo =
+document.getElementById("zoomInfo");
 
 map.on("click",function(e){
 
@@ -1169,6 +1188,8 @@ function(){
 
   updateMarkerVisibility();
 
+  updateZoomInfo();
+
   setTimeout(
     keepMapInsideBounds,
     1
@@ -1756,6 +1777,39 @@ slPassword.addEventListener(
   }
 );
 
+// =========================
+// ZOOM ANZEIGE
+// =========================
+
+function updateZoomInfo(){
+
+  let z =
+  map.getZoom();
+
+  if(z === 0){
+
+    zoomInfo.innerHTML =
+    "Zoom: 0";
+
+    return;
+
+  }
+
+  if(z > 0){
+
+    zoomInfo.innerHTML =
+    "Zoom: +" +
+    z.toFixed(2);
+
+    return;
+
+  }
+
+  zoomInfo.innerHTML =
+  "Zoom: " +
+  z.toFixed(2);
+
+}
 
 // =========================
 // START
@@ -1765,6 +1819,7 @@ slPassword.addEventListener(
 updateMarkerVisibility();
 updateMapButtons();
 keepMapInsideBounds();
+updateZoomInfo();
 
 
 </script>
