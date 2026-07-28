@@ -5,10 +5,55 @@
 <title>SVM Worldmap</title>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<link href="https://fonts.googleapis.com/css2?family=Eagle+Lake&display=swap" rel="stylesheet">
 
 <style>
 
+/* =========================
+   ANIRON FONT
+========================= */
+
+@font-face{
+  font-family:"Aniron";
+  src:url("anirm___.ttf") format("truetype");
+  font-weight:normal;
+  font-style:normal;
+}
+
+@font-face{
+  font-family:"Aniron";
+  src:url("anirb___.ttf") format("truetype");
+  font-weight:bold;
+  font-style:normal;
+}
+  /* =========================
+   ANIRON ELEMENTE
+========================= */
+
+#toolBox,
+#toolBox button,
+
+#mapSelector,
+#mapSelector button,
+
+#infoBox,
+
+#measureBox,
+
+#passwordDialog,
+#passwordDialog h3,
+#passwordDialog button,
+#passwordDialog input,
+
+#searchInput,
+
+.leaflet-control.legend-control,
+
+.leaflet-popup-content{
+
+  font-family:"Aniron", serif;
+
+}
+  
 html,body{
   margin:0;
   padding:0;
@@ -814,7 +859,9 @@ row["Icon"] || "📍";
 
 let popup =
 `
-<b>${name}</b>
+<b>${name}</b><b style="font-weight:bold;">
+${name}
+</b>
 
 <div style="
 max-height:100px;
