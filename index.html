@@ -1454,20 +1454,27 @@ function goToMarker(m){
     map.getMaxZoom()
   );
 
-map.flyTo(
-  [m.y,m.x],
-  targetZoom,
-  {
-    animate:true,
-    duration:0.5
-  }
-);
+  map.flyTo(
+    [m.y,m.x],
+    targetZoom,
+    {
+      animate:true,
+      duration:0.5
+    }
+  );
 
-setTimeout(function(){
+  setTimeout(function(){
 
-  m.marker.openPopup();
+    m.marker.openPopup();
 
-},600);
+  },600);
+
+  searchInput.value =
+  m.name;
+
+  suggestions.innerHTML="";
+
+}
 
 
 
