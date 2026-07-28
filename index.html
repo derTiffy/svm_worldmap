@@ -912,6 +912,17 @@ icon:createMarkerIcon(icon,size)
 
 .bindPopup(popup);
 
+marker.on("click",function(){
+
+  infoBox.innerHTML =
+  name +
+  " | X: " +
+  Math.round(x) +
+  " | Y: " +
+  Math.round(y);
+
+});
+
 
 
 
