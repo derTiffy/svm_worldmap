@@ -613,45 +613,23 @@ return value;
 
 
 
-function isImage(icon){
 
-
-return (
-
-icon.startsWith("http")
-
-&&
-
-(
-
-icon.includes("googleusercontent")
-
-||
-
-icon.includes("drive.google")
-
-||
-
-icon.includes(".png")
-
-||
-
-icon.includes(".jpg")
-
-||
-
-icon.includes(".jpeg")
-
-||
-
-icon.includes(".webp")
-
-)
-
-);
-
-
+function isImage(icon) {
+  return (
+    typeof icon === "string" &&
+    icon.startsWith("http") &&
+    (
+      icon.includes("googleusercontent") ||
+      icon.includes("drive.google") ||
+      icon.includes("sheets-images-rt") ||
+      icon.includes(".png") ||
+      icon.includes(".jpg") ||
+      icon.includes(".jpeg") ||
+      icon.includes(".webp")
+    )
+  );
 }
+
 
 
 
