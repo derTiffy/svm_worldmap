@@ -322,16 +322,6 @@ html,body{
   max-height:49px;
 }
 
-.custom-map-icon {
-  background: transparent;
-  border: none;
-}
-
-.custom-text-icon {
-  background: transparent;
-  border: none;
-}
-
 </style>
 
 </head>
@@ -623,21 +613,44 @@ return value;
 
 
 
+function isImage(icon){
 
-function isImage(icon) {
-  return (
-    typeof icon === "string" &&
-    icon.startsWith("http") &&
-    (
-      icon.includes("googleusercontent") ||
-      icon.includes("drive.google") ||
-      icon.includes("sheets-images-rt") ||
-      icon.includes(".png") ||
-      icon.includes(".jpg") ||
-      icon.includes(".jpeg") ||
-      icon.includes(".webp")
-    )
-  );
+
+return (
+
+icon.startsWith("http")
+
+&&
+
+(
+
+icon.includes("googleusercontent")
+
+||
+
+icon.includes("drive.google")
+
+||
+
+icon.includes(".png")
+
+||
+
+icon.includes(".jpg")
+
+||
+
+icon.includes(".jpeg")
+
+||
+
+icon.includes(".webp")
+
+)
+
+);
+
+
 }
 
 
@@ -645,41 +658,58 @@ function isImage(icon) {
 
 
 
+function createMarkerIcon(icon,size){
 
-function createMarkerIcon(icon, size) {
 
-  const resolved = resolveIcon(icon);
-  const iconSize = Number(size) || 30;
 
-  if (isImage(resolved)) {
+let resolved =
+resolveIcon(icon);
 
-    return L.icon({
-      iconUrl: resolved,
-      iconSize: [iconSize, iconSize],
-      iconAnchor: [iconSize / 2, iconSize / 2],
-      popupAnchor: [0, -iconSize / 2],
-      className: "custom-map-icon"
-    });
 
-  }
 
-  return L.divIcon({
+if(isImage(resolved)){
 
-    html: `<div style="
-      font-size:${iconSize}px;
-      line-height:1;
-      width:${iconSize}px;
-      height:${iconSize}px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    ">${resolved}</div>`,
 
-    className: "custom-text-icon",
-    iconSize: [iconSize, iconSize],
-    iconAnchor: [iconSize / 2, iconSize / 2]
 
-  });
+return L.icon({
+
+
+iconUrl:resolved,
+
+
+iconSize:[
+
+size,
+
+size
+
+],
+
+
+iconAnchor:[
+
+size/2,
+
+size
+
+],
+
+
+popupAnchor:[
+
+0,
+
+-size
+
+],
+
+
+shadowUrl:null
+
+
+});
+
+
 
 }
 
@@ -979,91 +1009,136 @@ updateMarkerVisibility();
 // =========================
 
 
-// =========================
-// LEGENDE
-// =========================
+function createMapLegend(legend){
 
-function createMapLegend(legend) {
 
-  if (!Array.isArray(legend) || legend.length === 0) {
-    console.warn(
-      "Legende fehlt oder hat ein unerwartetes Format:",
-      legend
-    );
-    return;
-  }
+if(!legend || legend.length===0){
 
-  // Vorhandene Legende entfernen, falls sie erneut aufgebaut wird
-  if (window.mapLegendControl) {
-    map.removeControl(window.mapLegendControl);
-    window.mapLegendControl = null;
-  }
+return;
 
-  const LegendControl = L.Control.extend({
-
-    options: {
-      position: "topleft"
-    },
-
-    onAdd: function () {
-
-      const div = L.DomUtil.create(
-        "div",
-        "legend-control"
-      );
-
-      legend.forEach(function (item) {
-
-        const row = document.createElement("div");
-        row.className = "legend-item";
-
-        const icon = resolveIcon(item.Icon);
-
-        const iconBox = document.createElement("div");
-        iconBox.className = "legend-icon";
-
-        if (isImage(icon)) {
-
-          const img = document.createElement("img");
-
-          img.src = icon;
-          img.alt = item.Typ || "Legendenicon";
-
-          img.onerror = function () {
-            console.warn(
-              "Legendenbild konnte nicht geladen werden:",
-              icon
-            );
-          };
-
-          iconBox.appendChild(img);
-
-        } else {
-
-          iconBox.textContent = icon;
-
-        }
-
-        const text = document.createElement("span");
-        text.textContent = item.Typ || "";
-
-        row.appendChild(iconBox);
-        row.appendChild(text);
-        div.appendChild(row);
-
-      });
-
-      L.DomEvent.disableClickPropagation(div);
-
-      return div;
-    }
-
-  });
-
-  window.mapLegendControl = new LegendControl();
-
-  map.addControl(window.mapLegendControl);
 }
+
+
+
+let LegendControl =
+L.Control.extend({
+
+
+options:{
+
+position:"topleft"
+
+},
+
+
+
+onAdd:function(){
+
+
+let div =
+L.DomUtil.create(
+"div",
+"legend-control"
+);
+
+
+
+legend.forEach(item=>{
+
+
+let row =
+document.createElement("div");
+
+row.className =
+"legend-item";
+
+
+
+let icon =
+resolveIcon(item.Icon);
+
+
+
+let iconBox =
+document.createElement("div");
+
+
+iconBox.className =
+"legend-icon";
+
+
+
+if(isImage(icon)){
+
+
+let img =
+document.createElement("img");
+
+
+img.src =
+icon;
+
+
+iconBox.appendChild(img);
+
+
+}
+
+else{
+
+
+iconBox.innerHTML =
+icon;
+
+
+}
+
+
+
+let text =
+document.createElement("span");
+
+
+text.innerHTML =
+item.Typ;
+
+
+
+row.appendChild(iconBox);
+
+row.appendChild(text);
+
+
+div.appendChild(row);
+
+
+
+});
+
+
+
+
+L.DomEvent.disableClickPropagation(div);
+
+
+
+return div;
+
+
+}
+
+
+});
+
+
+
+map.addControl(
+new LegendControl()
+);
+
+
+}
+
 
 
 
