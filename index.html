@@ -615,19 +615,20 @@ return value;
 
 
 function isImage(icon) {
-  return (
-    typeof icon === "string" &&
-    icon.startsWith("http") &&
-    (
-      icon.includes("googleusercontent") ||
-      icon.includes("drive.google") ||
-      icon.includes("sheets-images-rt") ||
-      icon.includes(".png") ||
-      icon.includes(".jpg") ||
-      icon.includes(".jpeg") ||
-      icon.includes(".webp")
-    )
-  );
+  if (typeof icon !== "string") return false;
+
+  const value = icon.trim();
+
+  if (!value) return false;
+
+  // Direkte Bilddaten
+  if (/^data:image\//i.test(value)) return true;
+
+  // URLs: Bei Icon-Feldern URLs grundsätzlich als Bilder behandeln.
+  // So werden auch Google-URLs erkannt, die keine Dateiendung haben.
+  if (/^https?:\/\//i.test(value)) return true;
+
+  return false;
 }
 
 
@@ -987,136 +988,91 @@ updateMarkerVisibility();
 // =========================
 
 
-function createMapLegend(legend){
+// =========================
+// LEGENDE
+// =========================
 
+function createMapLegend(legend) {
 
-if(!legend || legend.length===0){
+  if (!Array.isArray(legend) || legend.length === 0) {
+    console.warn(
+      "Legende fehlt oder hat ein unerwartetes Format:",
+      legend
+    );
+    return;
+  }
 
-return;
+  // Vorhandene Legende entfernen, falls sie erneut aufgebaut wird
+  if (window.mapLegendControl) {
+    map.removeControl(window.mapLegendControl);
+    window.mapLegendControl = null;
+  }
 
+  const LegendControl = L.Control.extend({
+
+    options: {
+      position: "topleft"
+    },
+
+    onAdd: function () {
+
+      const div = L.DomUtil.create(
+        "div",
+        "legend-control"
+      );
+
+      legend.forEach(function (item) {
+
+        const row = document.createElement("div");
+        row.className = "legend-item";
+
+        const icon = resolveIcon(item.Icon);
+
+        const iconBox = document.createElement("div");
+        iconBox.className = "legend-icon";
+
+        if (isImage(icon)) {
+
+          const img = document.createElement("img");
+
+          img.src = icon;
+          img.alt = item.Typ || "Legendenicon";
+
+          img.onerror = function () {
+            console.warn(
+              "Legendenbild konnte nicht geladen werden:",
+              icon
+            );
+          };
+
+          iconBox.appendChild(img);
+
+        } else {
+
+          iconBox.textContent = icon;
+
+        }
+
+        const text = document.createElement("span");
+        text.textContent = item.Typ || "";
+
+        row.appendChild(iconBox);
+        row.appendChild(text);
+        div.appendChild(row);
+
+      });
+
+      L.DomEvent.disableClickPropagation(div);
+
+      return div;
+    }
+
+  });
+
+  window.mapLegendControl = new LegendControl();
+
+  map.addControl(window.mapLegendControl);
 }
-
-
-
-let LegendControl =
-L.Control.extend({
-
-
-options:{
-
-position:"topleft"
-
-},
-
-
-
-onAdd:function(){
-
-
-let div =
-L.DomUtil.create(
-"div",
-"legend-control"
-);
-
-
-
-legend.forEach(item=>{
-
-
-let row =
-document.createElement("div");
-
-row.className =
-"legend-item";
-
-
-
-let icon =
-resolveIcon(item.Icon);
-
-
-
-let iconBox =
-document.createElement("div");
-
-
-iconBox.className =
-"legend-icon";
-
-
-
-if(isImage(icon)){
-
-
-let img =
-document.createElement("img");
-
-
-img.src =
-icon;
-
-
-iconBox.appendChild(img);
-
-
-}
-
-else{
-
-
-iconBox.innerHTML =
-icon;
-
-
-}
-
-
-
-let text =
-document.createElement("span");
-
-
-text.innerHTML =
-item.Typ;
-
-
-
-row.appendChild(iconBox);
-
-row.appendChild(text);
-
-
-div.appendChild(row);
-
-
-
-});
-
-
-
-
-L.DomEvent.disableClickPropagation(div);
-
-
-
-return div;
-
-
-}
-
-
-});
-
-
-
-map.addControl(
-new LegendControl()
-);
-
-
-}
-
 
 
 
