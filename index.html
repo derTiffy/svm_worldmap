@@ -629,16 +629,12 @@ function isImage(icon) {
 
   const value = icon.trim();
 
-  if (!value) return false;
-
-  // Direkte Bilddaten
-  if (/^data:image\//i.test(value)) return true;
-
-  // URLs: Bei Icon-Feldern URLs grundsätzlich als Bilder behandeln.
-  // So werden auch Google-URLs erkannt, die keine Dateiendung haben.
-  if (/^https?:\/\//i.test(value)) return true;
-
-  return false;
+  return (
+    /^https?:\/\/lh\d+\.googleusercontent\.com\//i.test(value) ||
+    /^https?:\/\/drive\.google\.com\//i.test(value) ||
+    /^https?:\/\/.*\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(value) ||
+    /^data:image\//i.test(value)
+  );
 }
 
 
