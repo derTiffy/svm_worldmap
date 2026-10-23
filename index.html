@@ -322,6 +322,16 @@ html,body{
   max-height:49px;
 }
 
+.custom-map-icon {
+  background: transparent;
+  border: none;
+}
+
+.custom-text-icon {
+  background: transparent;
+  border: none;
+}
+
 </style>
 
 </head>
@@ -637,58 +647,40 @@ function isImage(icon) {
 
 
 
-function createMarkerIcon(icon,size){
+function createMarkerIcon(icon, size) {
 
+  const resolved = resolveIcon(icon);
+  const iconSize = Number(size) || 30;
 
+  if (isImage(resolved)) {
 
-let resolved =
-resolveIcon(icon);
+    return L.icon({
+      iconUrl: resolved,
+      iconSize: [iconSize, iconSize],
+      iconAnchor: [iconSize / 2, iconSize / 2],
+      popupAnchor: [0, -iconSize / 2],
+      className: "custom-map-icon"
+    });
 
+  }
 
+  return L.divIcon({
 
-if(isImage(resolved)){
+    html: `<div style="
+      font-size:${iconSize}px;
+      line-height:1;
+      width:${iconSize}px;
+      height:${iconSize}px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    ">${resolved}</div>`,
 
+    className: "custom-text-icon",
+    iconSize: [iconSize, iconSize],
+    iconAnchor: [iconSize / 2, iconSize / 2]
 
-
-return L.icon({
-
-
-iconUrl:resolved,
-
-
-iconSize:[
-
-size,
-
-size
-
-],
-
-
-iconAnchor:[
-
-size/2,
-
-size
-
-],
-
-
-popupAnchor:[
-
-0,
-
--size
-
-],
-
-
-shadowUrl:null
-
-
-});
-
-
+  });
 
 }
 
