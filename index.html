@@ -625,15 +625,18 @@ return value;
 
 
 function isImage(icon) {
-  if (typeof icon !== "string") return false;
-
-  const value = icon.trim();
-
   return (
-    /^https?:\/\/lh\d+\.googleusercontent\.com\//i.test(value) ||
-    /^https?:\/\/drive\.google\.com\//i.test(value) ||
-    /^https?:\/\/.*\.(png|jpe?g|webp|gif|svg)(\?.*)?$/i.test(value) ||
-    /^data:image\//i.test(value)
+    typeof icon === "string" &&
+    icon.startsWith("http") &&
+    (
+      icon.includes("googleusercontent") ||
+      icon.includes("drive.google") ||
+      icon.includes("sheets-images-rt") ||
+      icon.includes(".png") ||
+      icon.includes(".jpg") ||
+      icon.includes(".jpeg") ||
+      icon.includes(".webp")
+    )
   );
 }
 
