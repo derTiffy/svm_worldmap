@@ -552,208 +552,89 @@ infoBox.innerHTML =
 // ICON SYSTEM
 // =========================
 
-
 function resolveIcon(icon){
 
+  if(!icon){
+    return "📍";
+  }
 
-if(!icon){
-
-return "📍";
-
-}
-
-
-
-let value =
-String(icon).trim();
-
-
-
-if(value===""){
-
-return "📍";
+  return String(icon).trim();
 
 }
-
-
-
-
-// Google Drive
-
-if(value.includes("drive.google.com")){
-
-
-let id =
-value.match(/[-\w]{25,}/);
-
-
-
-if(id){
-
-
-return "https://drive.google.com/uc?export=view&id="+id[0];
-
-
-}
-
-
-}
-
-
-
-
-return value;
-
-
-}
-
-
-
-
-
 
 
 function isImage(icon){
 
+  if(!icon){
+    return false;
+  }
 
-return (
-
-icon.startsWith("http")
-
-&&
-
-(
-
-icon.includes("googleusercontent")
-
-||
-
-icon.includes("drive.google")
-
-||
-
-icon.includes(".png")
-
-||
-
-icon.includes(".jpg")
-
-||
-
-icon.includes(".jpeg")
-
-||
-
-icon.includes(".webp")
-
-)
-
-);
-
+  return /^https?:\/\//i.test(
+    String(icon).trim()
+  );
 
 }
-
-
-
-
 
 
 function createMarkerIcon(icon,size){
 
+  const resolved =
+    String(resolveIcon(icon))
+    .trim();
 
+  if(isImage(resolved)){
 
-let resolved =
-resolveIcon(icon);
+    return L.icon({
 
+      iconUrl: resolved,
 
+      iconSize: [
+        size,
+        size
+      ],
 
-if(isImage(resolved)){
+      iconAnchor: [
+        size / 2,
+        size / 2
+      ],
 
+      popupAnchor: [
+        0,
+        -size / 2
+      ],
 
+      shadowUrl: null
 
-return L.icon({
+    });
 
+  }
 
-iconUrl:resolved,
+  return L.divIcon({
 
+    html:
+      `<div style="
+        font-size:${size}px;
+        text-align:center;
+      ">
+        ${resolved}
+      </div>`,
 
-iconSize:[
+    className: "",
 
-size,
+    iconSize: [
+      size,
+      size
+    ],
 
-size
+    iconAnchor: [
+      size / 2,
+      size / 2
+    ]
 
-],
-
-
-iconAnchor:[
-
-size/2,
-
-size
-
-],
-
-
-popupAnchor:[
-
-0,
-
--size
-
-],
-
-
-shadowUrl:null
-
-
-});
-
-
-
-}
-
-
-
-
-
-return L.divIcon({
-
-
-html:
-
-`
-<div style="
-font-size:${size}px;
-transform:translate(-50%,-50%);
-">
-${resolved}
-</div>
-`,
-
-
-
-className:"",
-
-
-iconSize:[size,size],
-
-
-iconAnchor:[
-
-size/2,
-
-size/2
-
-]
-
-
-
-});
-
-
+  });
 
 }
+
 
 // =========================
 // KARTENWECHSEL
