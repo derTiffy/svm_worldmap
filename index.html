@@ -578,48 +578,9 @@ function isImage(icon){
 
 function createMarkerIcon(icon,size){
 
-  const resolved =
-    String(resolveIcon(icon))
-    .trim();
+  return L.icon({
 
-  if(isImage(resolved)){
-
-    return L.icon({
-
-      iconUrl: resolved,
-
-      iconSize: [
-        size,
-        size
-      ],
-
-      iconAnchor: [
-        size / 2,
-        size / 2
-      ],
-
-      popupAnchor: [
-        0,
-        -size / 2
-      ],
-
-      shadowUrl: null
-
-    });
-
-  }
-
-  return L.divIcon({
-
-    html:
-      `<div style="
-        font-size:${size}px;
-        text-align:center;
-      ">
-        ${resolved}
-      </div>`,
-
-    className: "",
+    iconUrl: icon,
 
     iconSize: [
       size,
@@ -629,6 +590,11 @@ function createMarkerIcon(icon,size){
     iconAnchor: [
       size / 2,
       size / 2
+    ],
+
+    popupAnchor: [
+      0,
+      -size / 2
     ]
 
   });
